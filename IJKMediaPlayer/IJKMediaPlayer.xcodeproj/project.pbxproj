@@ -142,7 +142,6 @@
 		3B9C0A4B1CD439F500BAF849 /* Lock.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3B9C0A491CD439F500BAF849 /* Lock.hpp */; };
 		3B9C0A4E1CD43E7A00BAF849 /* VideoRecorderCoordinator.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B9C0A4C1CD43E7A00BAF849 /* VideoRecorderCoordinator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3B9C0A4F1CD43E7A00BAF849 /* VideoRecorderCoordinator.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C0A4D1CD43E7A00BAF849 /* VideoRecorderCoordinator.mm */; };
-		55140F441E7A8C90002D99F8 /* IJKMediaFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55140F431E7A8C90002D99F8 /* IJKMediaFramework.framework */; };
 		55BBD4A51E791CB60050F00A /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55BBD49C1E791CB60050F00A /* libavcodec.a */; };
 		55BBD4A61E791CB60050F00A /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55BBD49D1E791CB60050F00A /* libavfilter.a */; };
 		55BBD4A71E791CB60050F00A /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55BBD49E1E791CB60050F00A /* libavformat.a */; };
@@ -152,8 +151,6 @@
 		55BBD4AB1E791CB60050F00A /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55BBD4A21E791CB60050F00A /* libswresample.a */; };
 		55BBD4AC1E791CB60050F00A /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55BBD4A31E791CB60050F00A /* libswscale.a */; };
 		55BBD4AD1E791CB60050F00A /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55BBD4A41E791CB60050F00A /* libx264.a */; };
-		D4A3BF311E7AC8BF0096C4B0 /* AMapLocationKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4A3BF2F1E7AC8BF0096C4B0 /* AMapLocationKit.framework */; };
-		D4A3BF321E7AC8BF0096C4B0 /* AMapSearchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4A3BF301E7AC8BF0096C4B0 /* AMapSearchKit.framework */; };
 		E607FFE11B7B62E3005F11A6 /* IJKDeviceModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */; };
 		E654EA8F1B6B27E600B0F2D0 /* IJKMediaFramework.h in Headers */ = {isa = PBXBuildFile; fileRef = E654EA8E1B6B27E600B0F2D0 /* IJKMediaFramework.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E654EA951B6B27E600B0F2D0 /* IJKMediaFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E654EA8A1B6B27E600B0F2D0 /* IJKMediaFramework.framework */; };
@@ -343,8 +340,6 @@
 		55BBD4A21E791CB60050F00A /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
 		55BBD4A31E791CB60050F00A /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
 		55BBD4A41E791CB60050F00A /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
-		D4A3BF2F1E7AC8BF0096C4B0 /* AMapLocationKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AMapLocationKit.framework; path = ../AMapLocationKit.framework; sourceTree = "<group>"; };
-		D4A3BF301E7AC8BF0096C4B0 /* AMapSearchKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AMapSearchKit.framework; path = ../AMapSearchKit.framework; sourceTree = "<group>"; };
 		E607FFDE1B7B60F9005F11A6 /* IJKDeviceModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKDeviceModel.h; path = IJKMediaPlayer/IJKDeviceModel.h; sourceTree = "<group>"; };
 		E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKDeviceModel.m; path = IJKMediaPlayer/IJKDeviceModel.m; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
@@ -390,9 +385,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4A3BF311E7AC8BF0096C4B0 /* AMapLocationKit.framework in Frameworks */,
-				D4A3BF321E7AC8BF0096C4B0 /* AMapSearchKit.framework in Frameworks */,
-				55140F441E7A8C90002D99F8 /* IJKMediaFramework.framework in Frameworks */,
 				55BBD4A71E791CB60050F00A /* libavformat.a in Frameworks */,
 				55BBD4AA1E791CB60050F00A /* libpostproc.a in Frameworks */,
 				55BBD4AD1E791CB60050F00A /* libx264.a in Frameworks */,
@@ -801,8 +793,6 @@
 		E6903EBB17EAF6C500CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D4A3BF2F1E7AC8BF0096C4B0 /* AMapLocationKit.framework */,
-				D4A3BF301E7AC8BF0096C4B0 /* AMapSearchKit.framework */,
 				55140F431E7A8C90002D99F8 /* IJKMediaFramework.framework */,
 				3B98780F1CCDC5C800B55870 /* libiconv.2.4.0.tbd */,
 				3B98780D1CCDC5AA00B55870 /* libiconv.tbd */,
@@ -1172,7 +1162,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "";
+				GCC_PREFIX_HEADER = "/Users/sdfsdf/Desktop/xiefei/仓库/vue/Vue/PrefixHeader.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -1229,7 +1219,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "";
+				GCC_PREFIX_HEADER = "/Users/sdfsdf/Desktop/xiefei/仓库/vue/Vue/PrefixHeader.pch";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

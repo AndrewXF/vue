@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "A0623720081BCD62AE765893182E54C42E011257",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "A0623720081BCD62AE765893182E54C42E011257" : 9223372036854775807,
+    "7ABA4CBD2460DABBEC9938DA5B2B27B2F360324E" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "E714EDC3-4A25-4A16-A0E8-8ADB04CF3071",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "A0623720081BCD62AE765893182E54C42E011257" : "vue\/",
+    "7ABA4CBD2460DABBEC9938DA5B2B27B2F360324E" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Vue",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Vue.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "http:\/\/git.oschina.net\/zzhrainbow\/testFiles",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "7ABA4CBD2460DABBEC9938DA5B2B27B2F360324E"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/AndrewXF\/vue",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "A0623720081BCD62AE765893182E54C42E011257"
+    }
+  ]
+}
