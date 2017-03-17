@@ -17,7 +17,7 @@
 #import "UIButton+UIButtonImageWithLabel.h"
 #import "BabyUploadEntity.h"
 #import <IJKMediaFramework/VideoEncoder.h>
-//#import "VideoPublishViewController.h"
+#import "VideoPublishViewController.h"
 #import "ThemeStoreViewController.h"
 #import "BabyNavigationController.h"
 
@@ -178,7 +178,6 @@
     } else {
         _themeType = BABYVIDEO_THEME;
     }
-    //[MobClick beginLogPageView:[self title]];
     
 }
 
@@ -633,6 +632,9 @@
         }
     }];
     self.mMediaObject = [[BabyFileManager manager] convertBackMediaObject:self.mMediaObject];
+    
+    
+    
     VideoPublishViewController *publishVC = [[VideoPublishViewController alloc]init];
     publishVC.uploadEntity = uploadInfo;
     publishVC.fromDraft = _fromDraft;
@@ -651,6 +653,8 @@
     };
     
     [self.navigationController pushViewController:publishVC animated:YES];
+    
+    
     
 }
 
@@ -765,8 +769,13 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     // Return the number of rows in the section.
     if (_themeType == BABYVIDEO_THEME) {
+        NSLog(@"themeArray.count=%lu",(unsigned long)_themeArray.count);
+        
         return _themeArray.count;
     } else {
+        
+        NSLog(@"_filterArray.count=%lu",(unsigned long)_filterArray.count);
+
         return _filterArray.count;
     }
 }

@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "VideoRecorderViewController.h"
+#import "Vue-Swift.h"
 
 
 @interface ViewController ()

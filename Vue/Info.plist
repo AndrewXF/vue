@@ -24,6 +24,26 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSCameraUsageDescription</key>
+	<string>请授权打开</string>
+	<key>NSLocationUsageDescription</key>
+	<string>请授权打开</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>请授权打开</string>
+	<key>NSMotionUsageDescription</key>
+	<string>请授权打开</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>UIStatusBarTintParameters</key>
+	<dict>
+		<key>UINavigationBar</key>
+		<dict>
+			<key>Style</key>
+			<string>UIBarStyleDefault</string>
+			<key>Translucent</key>
+			<false/>
+		</dict>
+	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

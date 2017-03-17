@@ -80,6 +80,7 @@
     
     [self setupViews];
     [self setupPlayer];
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated

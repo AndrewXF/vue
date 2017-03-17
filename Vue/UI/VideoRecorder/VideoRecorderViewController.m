@@ -15,14 +15,20 @@
 #import <QuartzCore/QuartzCore.h>
 #import "SVProgressHUD.h"
 #import "GXCustomButton.h"
+#import "MacroDefinition.h"
+
+#import "Vue-Swift.h"
+
 #import <IJKMediaFramework/VideoEncoder.h>
 #import "TZImageManager.h"
 #import "TZImagePickerController.h"
 #import "BabyDialog.h"
-//#import "Babypai-swift.h"
-//#import "VideoPreviewViewController.h"
-//#import "VideoImportImageViewController.h"
-//#import "VideoImportVideoViewController.h"
+
+#import "VideoPreviewViewController.h"
+#import "VideoImportImageViewController.h"
+#import "VideoImportVideoViewController.h"
+
+
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "UIView+SDAutoLayout.h"
 
@@ -31,6 +37,9 @@
 #define TAG_ALERTVIEW_CLOSE_CONTROLLER 10086
 
 @interface VideoRecorderViewController () <BabyCaptureSessionCoordinatorDelegate, TZImagePickerControllerDelegate, UIAlertViewDelegate>
+{
+    PathDynamicModal *modal ;
+}
 
 @property (strong, nonatomic) ProgressBar *progressBar;
 
@@ -60,7 +69,6 @@
 @property (strong, nonatomic) UIView *maskViewTop;
 @property (strong, nonatomic) UIView *maskViewBottom;
 
-@property (nonatomic, weak) PathDynamicModal *modal;
 
 @property (nonatomic, strong) MediaObject *mMediaObject;
 
@@ -73,6 +81,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = UIColorFromRGB(BABYCOLOR_bg_publish);
+   
     
     [self initPreview];
     
@@ -87,6 +96,8 @@
     [self initVideoImportButton];
     [self initImageImportButton];
 }
+
+
 
 - (UIView *)getMaskViewTop
 {
@@ -174,20 +185,22 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+    [self prefersStatusBarHidden];
     [self.navigationController setNavigationBarHidden:YES animated:NO];
+    
     if (_captureSessionCoordinator != nil) {
         [_captureSessionCoordinator startRunning];
     }
-    //[MobClick beginLogPageView:@"视频录制页面"];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
+    
     [_captureSessionCoordinator stopRunning];
-    //[MobClick beginLogPageView:@"视频录制页面"];
 }
 
 - (void)initPreview
@@ -463,28 +476,27 @@
 - (void)pressImageImportButton
 {
 
-//    VideoImportImageViewController *imagePickerVc = [[VideoImportImageViewController alloc]init];
-//    imagePickerVc.tag = _tag;
-//    imagePickerVc.tag_id = _tag_id;
-//    
-//    imagePickerVc.onPublish = ^() {
-//        [self stopPipelineAndDismiss];
-//    };
-//    [self.navigationController pushViewController:imagePickerVc animated:YES];
+    VideoImportImageViewController *imagePickerVc = [[VideoImportImageViewController alloc]init];
+    imagePickerVc.tag = _tag;
+    imagePickerVc.tag_id = _tag_id;
+    
+    imagePickerVc.onPublish = ^() {
+        [self stopPipelineAndDismiss];
+    };
+    [self.navigationController pushViewController:imagePickerVc animated:YES];
+    
 }
 
 - (void)pushToVideoImport:(NSURL *)filePath
 {
-    
-    
-//    VideoImportVideoViewController *videoImportVc = [[VideoImportVideoViewController alloc]init];
-//    videoImportVc.tag = _tag;
-//    videoImportVc.tag_id = _tag_id;
-//    videoImportVc.videoPath = filePath;
-//    videoImportVc.onPublish = ^() {
-//        [self stopPipelineAndDismiss];
-//    };
-//    [self.navigationController pushViewController:videoImportVc animated:YES];
+    VideoImportVideoViewController *videoImportVc = [[VideoImportVideoViewController alloc]init];
+    videoImportVc.tag = _tag;
+    videoImportVc.tag_id = _tag_id;
+    videoImportVc.videoPath = filePath;
+    videoImportVc.onPublish = ^() {
+        [self stopPipelineAndDismiss];
+    };
+    [self.navigationController pushViewController:videoImportVc animated:YES];
 }
 
 - (void)pressCloseButton
@@ -507,30 +519,42 @@
 
 - (void)closeDialog
 {
+    
     BabyDialog *dialogView = [[BabyDialog alloc]initWithTitle:@"放弃录制" whitCancelText:@"取消" withSubmitText:@"放 弃" withContentText:@"您确认要放弃本视频吗？" isFlip:NO];
     dialogView.onSubmtClick = ^(){
-        [_modal closeWithLeansRandom];
+        [modal closeWithLeansRandom];
         [self dropTheVideo];
         
     };
     dialogView.onCancelClick = ^(){
-        [_modal closeWithLeansRandom];
+        [modal closeWithLeansRandom];
     };
     
+    
+    [PathDynamicModal showWithModalView:dialogView inView:[UIApplication sharedApplication].keyWindow];
+    
+    
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
-    _modal = [PathDynamicModal showWithModalView:dialogView inView:window];
-    _modal.showMagnitude = 100.0f;
-    _modal.closeMagnitude = 160.0f;
+    modal =[PathDynamicModal showWithModalView:dialogView inView:window];
+    modal.showMagnitude = 100.0f;
+    modal.closeMagnitude = 160.0f;
+    
+    
 }
 
 //放弃本次视频，并且关闭页面
 - (void)dropTheVideo
 {
+    
+    
     if (!_savedDraft) {
         [_captureSessionCoordinator deleteAllVideo];
     }
     
     [self stopPipelineAndDismiss];
+    
+    
+    
 }
 
 - (void)pressSwitchButton
@@ -700,26 +724,29 @@
 
 - (void)coordinator:(BabyCaptureSessionCoordinator *)videoRecorder didFinishMergingVideosToOutPutFileAtURL:(NSString *)outputFileURL mediaObject:(MediaObject *)mediaObject
 {
-//    DLog(@"outputFileURL : %@",outputFileURL);
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        self.isProcessingData = NO;
-//        [SVProgressHUD dismiss];
-//        self.mMediaObject = mediaObject;
-//        VideoPreviewViewController *player = [[VideoPreviewViewController alloc]initWithMediaObject:self.mMediaObject];
-//        player.tag = _tag;
-//        player.tag_id = _tag_id;
-//        player.fromDraft = NO;
-//        player.savedDraft = ^(BOOL saved) {
-//            _savedDraft = saved;
-//        };
-//        
-//        player.onPublish = ^() {
-//            [self stopPipelineAndDismiss];
-//        };
-//        
-//        [self.navigationController pushViewController:player animated:YES];
-//        
-//    });
+    
+    DLog(@"outputFileURL : %@",outputFileURL);
+    
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.isProcessingData = NO;
+        [SVProgressHUD dismiss];
+        self.mMediaObject = mediaObject;
+        VideoPreviewViewController *player = [[VideoPreviewViewController alloc]initWithMediaObject:self.mMediaObject];
+        player.tag = _tag;
+        player.tag_id = _tag_id;
+        player.fromDraft = NO;
+        player.savedDraft = ^(BOOL saved) {
+            _savedDraft = saved;
+        };
+        
+        player.onPublish = ^() {
+            [self stopPipelineAndDismiss];
+        };
+        
+        [self.navigationController pushViewController:player animated:YES];
+        
+    });
     
     
     

@@ -7,12 +7,12 @@
 //
 
 #import "BabyTableViewCell.h"
-#import <AMapSearchKit/AMapSearchKit.h>
+//#import <AMapSearchKit/AMapSearchKit.h>
 
 #define LocationCellH 56
 
 @interface CellLocationPublish : BabyTableViewCell
 
-@property(nonatomic, strong) AMapPOI *mAMapPOI;
+//@property(nonatomic, strong) AMapPOI *mAMapPOI;
 
 @end

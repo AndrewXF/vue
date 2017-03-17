@@ -36,13 +36,13 @@
 {
     [super viewWillAppear:animated];
     [self.navigationController setNavigationBarHidden:NO animated:YES];
-    [MobClick beginLogPageView:[self title]];
+    //[MobClick beginLogPageView:[self title]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [MobClick endLogPageView:[self title]];
+    //[MobClick endLogPageView:[self title]];
 }
 
 - (void)viewDidLoad {

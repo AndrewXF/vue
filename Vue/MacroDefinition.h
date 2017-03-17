@@ -11,8 +11,11 @@
 #import "BabyDataSource.h"
 #import "MJExtension.h"
 
+
 #ifndef HelloHaHa_MacroDefinition_h
 #define HelloHaHa_MacroDefinition_h
+#endif
+
 
 #define APPDELEGATE [(AppDelegate*)[UIApplication sharedApplication]  delegate]
 
@@ -742,72 +745,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # define SWIFT_UNAVAILABLE __attribute__((unavailable))
 #endif
 #if defined(__has_feature) && __has_feature(modules)
-@import UIKit;
-@import CoreGraphics;
-@import ObjectiveC;
-#endif
 
-#pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
-#pragma clang diagnostic ignored "-Wduplicate-method-arg"
-@class UIImage;
-@class UIButton;
-@class NSCoder;
-
-SWIFT_CLASS("_TtC7Babypai14ImageModalView")
-@interface ImageModalView : UIView
-@property (nonatomic, copy) void (^ _Nullable bottomButtonHandler)(void);
-@property (nonatomic, copy) void (^ _Nullable closeButtonHandler)(void);
-@property (nonatomic, strong) UIImage * _Nullable image;
-- (void)awakeFromNib;
-+ (ImageModalView * _Nonnull)instantiateFromNib;
-- (IBAction)handleCloseButton:(UIButton * _Nonnull)sender;
-- (IBAction)handleBottomButton:(UIButton * _Nonnull)sender;
-- (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
-- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-SWIFT_CLASS("_TtC7Babypai9ModalView")
-@interface ModalView : UIView
-@property (nonatomic, copy) void (^ _Nullable bottomButtonHandler)(void);
-@property (nonatomic, copy) void (^ _Nullable closeButtonHandler)(void);
-@property (nonatomic, weak) IBOutlet UIView * _Null_unspecified contentView;
-@property (nonatomic, weak) IBOutlet UIButton * _Null_unspecified closeButton;
-+ (ModalView * _Nonnull)instantiateFromNib;
-- (void)awakeFromNib;
-- (IBAction)handleBottomButton:(UIButton * _Nonnull)sender;
-- (IBAction)handleCloseButton:(UIButton * _Nonnull)sender;
-- (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
-- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
-@end
-
-@class UIColor;
-@class UITapGestureRecognizer;
-@class UIPanGestureRecognizer;
-@class UIGestureRecognizer;
-@class UITouch;
-
-SWIFT_CLASS("_TtC7Babypai16PathDynamicModal")
-@interface PathDynamicModal : NSObject <UIGestureRecognizerDelegate>
-@property (nonatomic, strong) UIColor * _Nonnull backgroundColor;
-@property (nonatomic) CGFloat backgroundAlpha;
-@property (nonatomic) CGFloat showMagnitude;
-@property (nonatomic) CGFloat closeMagnitude;
-@property (nonatomic) BOOL closeByTapBackground;
-@property (nonatomic) BOOL closeBySwipeBackground;
-@property (nonatomic, copy) void (^ _Nullable showedHandler)(void);
-@property (nonatomic, copy) void (^ _Nullable closedHandler)(void);
-+ (PathDynamicModal * _Nonnull)showWithModalView:(UIView * _Nonnull)view inView:(UIView * _Nonnull)inView;
-- (void)showWithModalView:(UIView * _Nonnull)view inView:(UIView * _Nonnull)inView;
-- (void)closeWithLeansLeft;
-- (void)closeWithLeansRight;
-- (void)closeWithStraight;
-- (void)closeWithLeansRandom;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (void)handleBackgroundView:(UITapGestureRecognizer * _Nonnull)sender;
-- (void)panBackgroundView:(UIPanGestureRecognizer * _Nonnull)sender;
-- (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldReceiveTouch:(UITouch * _Nonnull)touch;
-@end
 
 #pragma clang diagnostic pop
 

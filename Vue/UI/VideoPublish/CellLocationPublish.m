@@ -60,12 +60,12 @@
     .heightIs(1);
 }
 
-- (void)setMAMapPOI:(AMapPOI *)mAMapPOI
-{
-    _mAMapPOI = mAMapPOI;
-    
-    _poiName.text = mAMapPOI.name;
-    _poiAddress.text = mAMapPOI.address;
-}
+//- (void)setMAMapPOI:(AMapPOI *)mAMapPOI
+//{
+//    _mAMapPOI = mAMapPOI;
+//    
+//    _poiName.text = mAMapPOI.name;
+//    _poiAddress.text = mAMapPOI.address;
+//}
 
 @end

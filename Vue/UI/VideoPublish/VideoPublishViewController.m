@@ -20,18 +20,18 @@
 #import "Boards.h"
 #import "PublishUserViewController.h"
 #import "BabyNavigationController.h"
-#import "BoardsViewController.h"
+//#import "BoardsViewController.h"
 #import "BabyPinUpload.h"
-//#import "MainTabViewController.h"
-#import <AMapLocationKit/AMapLocationKit.h>
-#import <AMapSearchKit/AMapSearchKit.h>
+
+
+
 #import "PublishLocationViewController.h"
 #import "PublishTitlePageViewController.h"
 
 #define LocationTimeout 3  //   定位超时时间，可修改，最小2s
 #define MAX_LIMIT_NUMS 140
 
-@interface VideoPublishViewController () <HPGrowingTextViewDelegate, AMapLocationManagerDelegate, UIActionSheetDelegate>
+@interface VideoPublishViewController () <HPGrowingTextViewDelegate,UIActionSheetDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 
@@ -78,7 +78,7 @@
 
 @property (nonatomic, strong) UIActionSheet *locationSheet;
 
-@property (nonatomic, strong) AMapLocationManager *locationManager;
+//@property (nonatomic, strong) AMapLocationManager *locationManager;
 
 @end
 
@@ -155,7 +155,7 @@
     self.textView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
     self.textView.backgroundColor = [UIColor clearColor];
     self.textView.minNumberOfLines = 3;
-//    self.textView.maxNumberOfLines = 3;
+    //    self.textView.maxNumberOfLines = 3;
     // you can also set the maximum height in points with maxHeight
     self.textView.maxHeight = 80.0f;
     self.textView.returnKeyType = UIReturnKeyDone;
@@ -234,7 +234,7 @@
     _addBoardTip = addBoardTip;
     [_scrollView addSubview:_addBoardTip];
     
-    [AMapLocationServices sharedServices].apiKey = AMAPAPIKEY;
+//    [AMapLocationServices sharedServices].apiKey = AMAPAPIKEY;
     
     
     [self initData];
@@ -256,13 +256,13 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
     self.navigationController.navigationBar.hidden = YES;
     self.navigationController.interactivePopGestureRecognizer.enabled = NO;
-//    [UIView animateWithDuration:1.4 animations:^{
-//        self.navigationController.navigationBar.hidden = YES;
-//    } completion:^(BOOL finished) {
-//        
-//        self.navigationController.navigationBar.hidden = YES;
-//        
-//    }];
+    //    [UIView animateWithDuration:1.4 animations:^{
+    //        self.navigationController.navigationBar.hidden = YES;
+    //    } completion:^(BOOL finished) {
+    //
+    //        self.navigationController.navigationBar.hidden = YES;
+    //
+    //    }];
     
     _privateButton.selected = _bool_private;
     
@@ -285,19 +285,19 @@
                                              selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
-    _locationManager = [[AMapLocationManager alloc] init];
-    [_locationManager setDelegate:self];
-    [_locationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters];
-    [_locationManager setPausesLocationUpdatesAutomatically:NO];
-//    [_locationManager setAllowsBackgroundLocationUpdates:YES];
-    [_locationManager setLocationTimeout:LocationTimeout];
+//    _locationManager = [[AMapLocationManager alloc] init];
+//    [_locationManager setDelegate:self];
+//    [_locationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters];
+//    [_locationManager setPausesLocationUpdatesAutomatically:NO];
+//    //    [_locationManager setAllowsBackgroundLocationUpdates:YES];
+//    [_locationManager setLocationTimeout:LocationTimeout];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-//    if (_fromDraft) {
-//        [self saveDraft:1];
-//    }
+    //    if (_fromDraft) {
+    //        [self saveDraft:1];
+    //    }
     
     [super viewWillDisappear:animated];
     [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
@@ -310,8 +310,8 @@
     [super viewDidDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-    [self.locationManager stopUpdatingLocation];
-    [self.locationManager setDelegate:nil];
+//    [self.locationManager stopUpdatingLocation];
+//    [self.locationManager setDelegate:nil];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -540,45 +540,47 @@
 
 - (void)startLocation
 {
-    __weak VideoPublishViewController *wSelf = self;
-    AMapLocatingCompletionBlock completionBlock = ^(CLLocation *location, AMapLocationReGeocode *regeocode, NSError *error)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [SVProgressHUD dismiss];
-        });
-        if (error)
-        {
-            NSLog(@"locError:{%ld - %@};", (long)error.code, error.localizedDescription);
+//    __weak VideoPublishViewController *wSelf = self;
+//    AMapLocatingCompletionBlock completionBlock = ^(CLLocation *location, AMapLocationReGeocode *regeocode, NSError *error)
+//    {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            [SVProgressHUD dismiss];
+//        });
+//        if (error)
+//        {
+//            NSLog(@"locError:{%ld - %@};", (long)error.code, error.localizedDescription);
             
             
-            [SVProgressHUD showErrorWithStatus:@"无法获取您的位置信息~"];
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [SVProgressHUD dismiss];
-            });
-            
-            if (error.code == AMapLocationErrorLocateFailed)
-            {
-                return;
-            }
-        }
-        
-        if (location)
-        {
-            _mProvinceCode = 0;
-            _mCityCode = [regeocode.citycode intValue];
-            _mDistrictCode = [regeocode.adcode intValue];
-            _mProvince = regeocode.province;
-            _mCity = regeocode.city;
-            _mDistrict = regeocode.district;
-            _poi = regeocode.POIName;
-            
-            _locationText = regeocode.POIName;
-            _bool_location = YES;
-            [wSelf updateLocationButton];
-        }
-    };
+//            [SVProgressHUD showErrorWithStatus:@"无法获取您的位置信息~"];
+//            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//                [SVProgressHUD dismiss];
+//            });
+//            
+//            if (error.code == AMapLocationErrorLocateFailed)
+//            {
+//                return;
+//            }
+//        }
+//        
+//        if (location)
+//        {
+//            _mProvinceCode = 0;
+//            _mCityCode = [regeocode.citycode intValue];
+//            _mDistrictCode = [regeocode.adcode intValue];
+//            _mProvince = regeocode.province;
+//            _mCity = regeocode.city;
+//            _mDistrict = regeocode.district;
+//            _poi = regeocode.POIName;
+//            
+//            _locationText = regeocode.POIName;
+//            _bool_location = YES;
+//        }
+//    };
     
-    [_locationManager requestLocationWithReGeocode:YES completionBlock:completionBlock];
+//    [_locationManager requestLocationWithReGeocode:YES completionBlock:completionBlock];
+      [SVProgressHUD dismiss];
+      [self updateLocationButton];
+
 }
 
 
@@ -610,16 +612,16 @@
 {
     DLog(@"pressAddBoardButton");
     
-    BoardsViewController *boardsVC = [[BoardsViewController alloc]init];
-    boardsVC.user_id = [self loginUserId];
-    boardsVC.boardType = BOARDS_TYPE_SELECT;
-    boardsVC.onBoardSelect = ^(Board *board) {
-        DLog(@"board %@", board.title);
-        _publish_board_id = board.board_id;
-        _publish_board_text = board.title;
-        [self updateAddBoardButton];
-    };
-    [self.navigationController pushViewController:boardsVC animated:YES];
+//    BoardsViewController *boardsVC = [[BoardsViewController alloc]init];
+//    boardsVC.user_id = [self loginUserId];
+//    boardsVC.boardType = BOARDS_TYPE_SELECT;
+//    boardsVC.onBoardSelect = ^(Board *board) {
+//        DLog(@"board %@", board.title);
+//        _publish_board_id = board.board_id;
+//        _publish_board_text = board.title;
+//        [self updateAddBoardButton];
+//    };
+//    [self.navigationController pushViewController:boardsVC animated:YES];
 }
 
 - (void)pressCoverButton
@@ -901,7 +903,7 @@
         
         switch (buttonIndex) {
             case 0:
-//                [self commentAt];
+                //                [self commentAt];
                 
                 [self reLocation];
                 break;

@@ -7,10 +7,13 @@
 //
 
 #import "BabyBaseVC.h"
+#import "SVProgressHUD.h"
+#import "AFNetworking.h"
+
 
 
 @interface BabyBaseVC ()
-
+@property(nonatomic, strong) AFNetworkReachabilityManager *reachabilityMannger;
 @end
 
 @implementation BabyBaseVC
@@ -31,55 +34,55 @@
     self.automaticallyAdjustsScrollViewInsets = YES;
     
 }
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
+    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
+    [self startNetworkReachability];
+    [self initUserInfo];
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(initUserInfo) name:NOTIFICATION_USER object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(uploaPinNotification:) name:NOTIFICATION_PIN_UPLOAD object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToPin:) name:NOTIFICATION_SCHEME_PIN object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToUser:) name:NOTIFICATION_SCHEME_USER object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToTag:) name:NOTIFICATION_SCHEME_TAG object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToSubject:) name:NOTIFICATION_SCHEME_SUBJECT object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushNotification:) name:NOTIFICATION_PUSH_MESSAGE object:nil];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [SVProgressHUD dismiss];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_USER object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_PIN_UPLOAD object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_PIN object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_USER object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_TAG object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_SUBJECT object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_PUSH_MESSAGE object:nil];
+    [self stopNetworkReachability];
+    
+}
 //
-//- (void)viewWillAppear:(BOOL)animated
-//{
-//    [super viewWillAppear:animated];
-//    [self.navigationController setNavigationBarHidden:NO animated:YES];
-//    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
-//    [self startNetworkReachability];
-//    [self initUserInfo];
-//}
-//
-//- (void)viewDidAppear:(BOOL)animated
-//{
-//    [super viewDidAppear:animated];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(initUserInfo) name:NOTIFICATION_USER object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(uploaPinNotification:) name:NOTIFICATION_PIN_UPLOAD object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToPin:) name:NOTIFICATION_SCHEME_PIN object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToUser:) name:NOTIFICATION_SCHEME_USER object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToTag:) name:NOTIFICATION_SCHEME_TAG object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(schemeToSubject:) name:NOTIFICATION_SCHEME_SUBJECT object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushNotification:) name:NOTIFICATION_PUSH_MESSAGE object:nil];
-//}
-//
-//- (void)viewWillDisappear:(BOOL)animated
-//{
-//    [super viewWillDisappear:animated];
-//    [SVProgressHUD dismiss];
-//}
-//
-//- (void)viewDidDisappear:(BOOL)animated
-//{
-//    [super viewDidDisappear:animated];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_USER object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_PIN_UPLOAD object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_PIN object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_USER object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_TAG object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SCHEME_SUBJECT object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_PUSH_MESSAGE object:nil];
-//    [self stopNetworkReachability];
-//    
-//}
-//
-//- (UIStatusBarStyle)preferredStatusBarStyle {
-//    return UIStatusBarStyleLightContent;
-//}
-//
-//- (void)didReceiveMemoryWarning {
-//    [super didReceiveMemoryWarning];
-//}
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
 //
 //-(void)uploaPinNotification:(NSNotification*)notification
 //{
@@ -199,32 +202,32 @@
 //    
 //}
 //
-//- (void)initUserInfo
-//{
-//    DLogV(@"initUserInfo-----------------------------");
-//    
-//    if ([[NSThread currentThread] isMainThread]) {
-//        DLogV(@"main");
-//    } else {
-//        DLogV(@"not main");
-//    }
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        //do your UI
-//        DLogV(@"do your UI");
-//    });
-//    
-//    _loginUserInfomation = [Utils userInfomation];
-//    
-//    if (_loginUserInfomation != nil) {
-//        _loginUserId = _loginUserInfomation.info.user_id;
-//        _isLogin = _loginUserId > 0;
-//        
-//    } else {
-//        _isLogin = NO;
-//        _loginUserId = 0;
-//    }
-//    
-//}
+- (void)initUserInfo
+{
+    DLogV(@"initUserInfo-----------------------------");
+    
+    if ([[NSThread currentThread] isMainThread]) {
+        DLogV(@"main");
+    } else {
+        DLogV(@"not main");
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //do your UI
+        DLogV(@"do your UI");
+    });
+    
+    _loginUserInfomation = [Utils userInfomation];
+    
+    if (_loginUserInfomation != nil) {
+        _loginUserId = _loginUserInfomation.info.user_id;
+        _isLogin = _loginUserId > 0;
+        
+    } else {
+        _isLogin = NO;
+        _loginUserId = 0;
+    }
+    
+}
 //
 //- (void)shareCommon:(NSString *)shareTitle shareDes:(NSString *)shareDes shareUrl:(NSString *)shareUrl shareImageUrl:(NSString *)shareImageUrl shareImage:(UIImage *)shareImage
 //{
@@ -743,42 +746,43 @@
 //    }];
 //}
 //
-//- (void)startNetworkReachability
-//{
-//    _reachabilityMannger =   [AFNetworkReachabilityManager sharedManager];
-//    
-//    [_reachabilityMannger setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-//        NSString *result = @"";
-//        switch (status) {
-//            case AFNetworkReachabilityStatusUnknown:
-//                result = @"未知网络";
-//                break;
-//            case AFNetworkReachabilityStatusNotReachable:
-//                result = @"无网络";
-//                break;
-//            case AFNetworkReachabilityStatusReachableViaWWAN:
-//                result = @"WAN";
-//                _isNetworkWAN = YES;
-//                break;
-//            case AFNetworkReachabilityStatusReachableViaWiFi:
-//                result = @"WIFI";
-//                _isNetworkWAN = NO;
-//                break;
-//                
-//            default:
-//                break;
-//        }
-//        DLogV(@"NetworkReachability : %@",result);
-//    }];
-//    
-//    [_reachabilityMannger startMonitoring];
-//}
-//
-//- (void)stopNetworkReachability
-//{
-//    if (_reachabilityMannger) {
-//        [_reachabilityMannger stopMonitoring];
-//    }
-//}
-//
+
+- (void)startNetworkReachability
+{
+    _reachabilityMannger =   [AFNetworkReachabilityManager sharedManager];
+    
+    [_reachabilityMannger setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        NSString *result = @"";
+        switch (status) {
+            case AFNetworkReachabilityStatusUnknown:
+                result = @"未知网络";
+                break;
+            case AFNetworkReachabilityStatusNotReachable:
+                result = @"无网络";
+                break;
+            case AFNetworkReachabilityStatusReachableViaWWAN:
+                result = @"WAN";
+                _isNetworkWAN = YES;
+                break;
+            case AFNetworkReachabilityStatusReachableViaWiFi:
+                result = @"WIFI";
+                _isNetworkWAN = NO;
+                break;
+                
+            default:
+                break;
+        }
+        DLogV(@"NetworkReachability : %@",result);
+    }];
+    
+    [_reachabilityMannger startMonitoring];
+}
+
+- (void)stopNetworkReachability
+{
+    if (_reachabilityMannger) {
+        [_reachabilityMannger stopMonitoring];
+    }
+}
+
 @end
