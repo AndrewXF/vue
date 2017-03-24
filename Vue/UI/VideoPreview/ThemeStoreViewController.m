@@ -75,6 +75,7 @@
     [self.view addSubview:self.tableView];
     [self.tableView registerClass:[CellThemeStore class] forCellReuseIdentifier:NSStringFromClass([CellThemeStore class])];
     [self loadData];
+    
 }
 
 - (void)initUserInfo
@@ -302,6 +303,7 @@
 
 - (void)saveIntoEntity:(VideoTheme *)mVideoTheme
 {
+    
     VideoThemeEntity *themeEntity = [VideoThemeEntity MR_findFirstOrCreateByAttribute:@"themeId" withValue:[NSNumber numberWithLong:mVideoTheme.themeId]];
     
     themeEntity.themeIcon = mVideoTheme.themeIcon;

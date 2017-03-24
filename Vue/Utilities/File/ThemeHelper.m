@@ -69,7 +69,7 @@
             }
         }
         
-    }
+}
     
     NSString *resourceDir = [mThemeCacheDir stringByAppendingPathComponent:THEME_MUSIC_VIDEO_ASSETS];
     if ([file_manager fileExistsAtPath:resourceDir]) {

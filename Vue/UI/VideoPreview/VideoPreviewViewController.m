@@ -20,6 +20,7 @@
 #import "VideoPublishViewController.h"
 #import "ThemeStoreViewController.h"
 #import "BabyNavigationController.h"
+#import "UIView+SDAutoLayout.h"
 
 #define THEME_ENABLE_MAX 20*1000
 
@@ -37,6 +38,8 @@
 @property (nonatomic, assign) BABYVIDEO_THEME_FILTER themeType;
 
 @property (nonatomic, assign) BOOL mStartEncoding;
+
+@property (strong, nonatomic) UIButton *closeButton;
 
 /**
  * 导演签名
@@ -92,6 +95,7 @@
 @property (nonatomic, strong) MenuHrizontal *themeFilterMenu;
 
 @property (nonatomic, strong) UIButton *originMusic;
+@property (nonatomic, strong) UIButton *shuiwenBtn;
 
 @property (nonatomic, strong) NSArray *videoFilter;
 
@@ -140,33 +144,30 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColorFromRGB(BABYCOLOR_bg_publish);
-    CGSize rightTexttSize = [@"下一步" sizeWithAttributes:@{NSFontAttributeName: kFontSize(18)}];
-    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, rightTexttSize.width + 16, rightTexttSize.height)];
-    rightButton.titleLabel.font = kFontSize(18);
-    [rightButton addTarget:self action:@selector(pressNextButton) forControlEvents:UIControlEventTouchUpInside];
-    [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
     
-    UIBarButtonItem *item = [[UIBarButtonItem alloc]initWithCustomView:rightButton];
+//    self.view.backgroundColor = UIColorFromRGB(BABYCOLOR_bg_publish);
+    self.view.backgroundColor = [UIColor whiteColor];
+
+
+//    self.automaticallyAdjustsScrollViewInsets = NO;
     
-    self.navigationItem.rightBarButtonItem = item;
-    
-    self.automaticallyAdjustsScrollViewInsets = NO;
-    
+    [self initNaviBar];
     [self initData];
     [self initVideoThemes];
     [self initButtons];
     [self initPreview];
     
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    
     [super viewWillAppear:animated];
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
     self.navigationController.navigationBar.barTintColor = UIColorFromRGB(BABYCOLOR_bg_publish);
-    [self.navigationController setNavigationBarHidden:NO animated:NO];
     self.navigationController.interactivePopGestureRecognizer.enabled = NO;
+    [self.navigationController setNavigationBarHidden:YES animated:NO];
+
     
     [self installMovieNotificationObservers];
     [self.player playWithURLString:_mVideoTempPath withFilters:nil];
@@ -210,7 +211,46 @@
     [self.player shutdown];
     [self removeMovieNotificationObservers];
 }
-
+-(void)initNaviBar
+{
+    
+    UIView *colorBack = [[UIView alloc] init];
+    [colorBack setBackgroundColor:RGB(244.0f, 48.0f, 125.0f)];
+    [self.view addSubview:colorBack];
+    colorBack.sd_layout.xIs(0).yIs(0).widthIs(self.view.width).heightIs(50.0f);
+    
+    
+    //关闭
+    self.closeButton = [[UIButton alloc] init];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateNormal];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateDisabled];
+    //    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateSelected];
+    //    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateHighlighted];
+    [_closeButton addTarget:self action:@selector(pressCloseButton) forControlEvents:UIControlEventTouchUpInside];
+    _closeButton.layer.zPosition = 1001;
+    [self.view addSubview:_closeButton];
+    
+    
+    _closeButton.sd_layout
+    .widthIs(40)
+    .heightIs(40)
+    .topSpaceToView(self.view, 5)
+    .leftSpaceToView(self.view, 5);
+    
+    
+    
+    CGSize rightTexttSize = [@"下一步" sizeWithAttributes:@{NSFontAttributeName: kFontSize(18)}];
+    
+    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(colorBack.frame.size.width-85.0f, 15.0f, rightTexttSize.width + 16, rightTexttSize.height)];
+    rightButton.titleLabel.font = kFontSize(18);
+    [rightButton addTarget:self action:@selector(pressNextButton) forControlEvents:UIControlEventTouchUpInside];
+    [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    
+    
+    [colorBack addSubview:rightButton];
+    
+}
 - (void)initUserInfo
 {
     [super initUserInfo];
@@ -235,6 +275,7 @@
         self.mCoverPath = [self.mVideoPath stringByReplacingOccurrencesOfString:@".mp4" withString:@".jpg"];
         
         self.mThemeCommonPath = [[[BabyFileManager manager] themeDir] stringByAppendingPathComponent:THEME_VIDEO_COMMON];
+        
     } else {
         // 做测试用
         self.mDuration = 6000;
@@ -242,7 +283,11 @@
         self.mVideoPath = [[[BabyFileManager manager] themeDir] stringByAppendingString:[self.mVideoTempPath lastPathComponent]];
         self.mCoverPath = [self.mVideoPath stringByReplacingOccurrencesOfString:@".mp4" withString:@".jpg"];
         
+        
         self.mThemeCommonPath = [[[BabyFileManager manager] themeDir] stringByAppendingPathComponent:THEME_VIDEO_COMMON];
+        //self.mThemeCommonPath+frame_overlay_black.png
+        
+        
     }
     self.videoFilter = nil;
     _isDownloadTheme = NO;
@@ -327,16 +372,37 @@
     }
     
     _originMusic = [[UIButton alloc]init];
-    [_originMusic setImage:ImageNamed(@"preview_music_original") forState:UIControlStateNormal];
-    [_originMusic setImage:ImageNamed(@"preview_music_original_disable") forState:UIControlStateSelected];
+//    [_originMusic setImage:ImageNamed(@"preview_music_original") forState:UIControlStateNormal];
+//    [_originMusic setImage:ImageNamed(@"preview_music_original_disable") forState:UIControlStateSelected];
+    [_originMusic setTitle:@"关闭原音" forState:UIControlStateNormal];
+    [_originMusic setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [_originMusic addTarget:self action:@selector(pressOriginMusicButton) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_originMusic];
     
     _originMusic.sd_layout
-    .widthIs(36)
+    .widthIs(86)
     .heightIs(36)
     .rightSpaceToView(self.view, 10)
     .bottomSpaceToView(line, 4);
+    
+    
+    
+    _shuiwenBtn = [[UIButton alloc]init];
+    //    [_originMusic setImage:ImageNamed(@"preview_music_original") forState:UIControlStateNormal];
+    //    [_originMusic setImage:ImageNamed(@"preview_music_original_disable") forState:UIControlStateSelected];
+    [_shuiwenBtn setTitle:@"自定义水印" forState:UIControlStateNormal];
+    [_shuiwenBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [_shuiwenBtn addTarget:self action:@selector(pressOriginMusicButton) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_shuiwenBtn];
+    
+    
+    _shuiwenBtn.sd_layout
+    .widthIs(106)
+    .heightIs(36)
+    .rightSpaceToView(self.view, 120)
+    .bottomSpaceToView(line, 4);
+    
+    
     
     
 }

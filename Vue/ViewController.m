@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "VideoRecorderViewController.h"
 #import "Vue-Swift.h"
+#import "ThemeHelper.h"
 
 
 @interface ViewController ()
@@ -27,6 +28,9 @@
     [button addTarget:self action:@selector(videoButtonTouched) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:button];
     
+    
+    [[ThemeHelper helper] prepareTheme];
+
     
     
     // Do any additional setup after loading the view, typically from a nib.

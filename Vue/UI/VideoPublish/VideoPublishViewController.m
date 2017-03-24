@@ -46,6 +46,7 @@
 @property(nonatomic, strong) UILabel *textViewNum;
 
 @property (nonatomic, strong) UIButton *tagButton, *atButton, *locationButton, *privateButton, *addBoardButton;
+@property (strong, nonatomic) UIButton *closeButton;
 
 @property (nonatomic, strong) UILabel *addBoardTip;
 
@@ -88,6 +89,12 @@
     [super viewDidLoad];
     
     
+    UIView *colorBack = [[UIView alloc] init];
+    [colorBack setBackgroundColor:RGB(244.0f, 48.0f, 125.0f)];
+    [self.view addSubview:colorBack];
+    colorBack.sd_layout.xIs(0).yIs(0).widthIs(self.view.width).heightIs(50.0f);
+    
+    
     
     UIButton *publishButton = [[UIButton alloc]initWithFrame:CGRectMake(0, (SCREEN_HEIGHT - NavigationBar_HEIGHT), SCREEN_WIDTH, NavigationBar_HEIGHT)];
     
@@ -98,6 +105,8 @@
     [publishButton setBackgroundImage:ImageNamed(@"baby_color_red_height") forState:UIControlStateNormal];
     [publishButton setBackgroundImage:ImageNamed(@"baby_color_red_base") forState:UIControlStateHighlighted];
     [self.view addSubview:publishButton];
+    
+    
     
     _topImage = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_WIDTH)];
     [self.view addSubview:_topImage];
@@ -120,7 +129,7 @@
     title.textColor = [UIColor whiteColor];
     title.font = kFontSize(20);
     title.textAlignment = NSTextAlignmentCenter;
-    title.text = @"发 布";
+    title.text = @"预览";
     title.layer.zPosition = 1000;
     [self.view addSubview:title];
     
@@ -235,7 +244,8 @@
     [_scrollView addSubview:_addBoardTip];
     
 //    [AMapLocationServices sharedServices].apiKey = AMAPAPIKEY;
-    
+    _scrollView.hidden = YES;
+
     
     [self initData];
     
@@ -337,6 +347,45 @@
     
 }
 
+-(void)initNaviBar
+{
+    UIView *colorBack = [[UIView alloc] init];
+    [colorBack setBackgroundColor:RGB(244.0f, 48.0f, 125.0f)];
+    [self.view addSubview:colorBack];
+    colorBack.sd_layout.xIs(0).yIs(0).widthIs(self.view.width).heightIs(50.0f);
+    
+    
+    //关闭
+    self.closeButton = [[UIButton alloc] init];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateNormal];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateDisabled];
+    //    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateSelected];
+    //    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateHighlighted];
+    [_closeButton addTarget:self action:@selector(pressCloseButton) forControlEvents:UIControlEventTouchUpInside];
+    _closeButton.layer.zPosition = 1001;
+    [self.view addSubview:_closeButton];
+    
+    
+    _closeButton.sd_layout
+    .widthIs(40)
+    .heightIs(40)
+    .topSpaceToView(self.view, 5)
+    .leftSpaceToView(self.view, 5);
+    
+    
+    
+    CGSize rightTexttSize = [@"下一步" sizeWithAttributes:@{NSFontAttributeName: kFontSize(18)}];
+    
+    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(colorBack.frame.size.width-85.0f, 15.0f, rightTexttSize.width + 16, rightTexttSize.height)];
+    rightButton.titleLabel.font = kFontSize(18);
+    [rightButton addTarget:self action:@selector(pressNextButton) forControlEvents:UIControlEventTouchUpInside];
+    [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [colorBack addSubview:rightButton];
+    
+    
+}
+
 - (void)getUserLastBoard
 {
     DataCompletionBlock completionBlock = ^(NSDictionary *data, NSString *errorString){
@@ -412,6 +461,7 @@
     CGSize rightTexttSize = [rightText sizeWithAttributes:@{NSFontAttributeName: kFontSize(18)}];
     _rightButton = [[UIButton alloc]initWithFrame:CGRectMake(SCREEN_WIDTH - rightTexttSize.width - 32, (NavigationBar_HEIGHT - rightTexttSize.height) / 2, rightTexttSize.width + 32, rightTexttSize.height + 4)];
     _rightButton.titleLabel.font = kFontSize(18);
+    _rightButton.hidden = YES;
     [_rightButton addTarget:self action:@selector(pressDraftButton) forControlEvents:UIControlEventTouchUpInside];
     
     if (_isDraft) {

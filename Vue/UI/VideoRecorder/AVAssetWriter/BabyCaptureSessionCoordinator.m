@@ -114,6 +114,9 @@
 - (void)focusInPoint:(CGPoint)touchPoint
 {
     CGPoint devicePoint = [self convertToPointOfInterestFromViewCoordinates:touchPoint];
+    NSLog(@"devicePoint.width=%f,devicePoint.height=%f",devicePoint.x,devicePoint.y);
+    
+    
     [self focusWithMode:AVCaptureFocusModeAutoFocus exposeWithMode:AVCaptureExposureModeContinuousAutoExposure atDevicePoint:devicePoint monitorSubjectAreaChange:YES];
 }
 

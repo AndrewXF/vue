@@ -36,9 +36,12 @@
 
 #define TAG_ALERTVIEW_CLOSE_CONTROLLER 10086
 
-@interface VideoRecorderViewController () <BabyCaptureSessionCoordinatorDelegate, TZImagePickerControllerDelegate, UIAlertViewDelegate>
+@interface VideoRecorderViewController () <BabyCaptureSessionCoordinatorDelegate, TZImagePickerControllerDelegate, UIAlertViewDelegate,CAAnimationDelegate>
 {
     PathDynamicModal *modal ;
+    UIButton *buttonSelect[5];
+    UIButton *buttonSelectTime[5];
+
 }
 
 @property (strong, nonatomic) ProgressBar *progressBar;
@@ -68,6 +71,8 @@
 
 @property (strong, nonatomic) UIView *maskViewTop;
 @property (strong, nonatomic) UIView *maskViewBottom;
+@property (strong, nonatomic) CALayer *maskHuafuLayer;
+@property (strong, nonatomic) CALayer *maskCircleLayer;
 
 
 @property (nonatomic, strong) MediaObject *mMediaObject;
@@ -80,11 +85,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColorFromRGB(BABYCOLOR_bg_publish);
-   
+    
+//    self.view.backgroundColor = UIColorFromRGB(BABYCOLOR_bg_publish);
+//    self.view.backgroundColor = RGB(244.0f, 48.0f, 125.0f);
+    self.view.backgroundColor = [UIColor blackColor];
     
     [self initPreview];
-    
+    [self initHuafuBtns];
     [self setOutputDirectory];
     
     
@@ -95,6 +102,7 @@
     [self initOKButton];
     [self initVideoImportButton];
     [self initImageImportButton];
+
 }
 
 
@@ -179,6 +187,8 @@
     
     [self initRecorder];
     [self hideMaskView];
+    [self initHuafuLayer];
+
     self.initalized = YES;
 }
 
@@ -186,8 +196,7 @@
 {
     [super viewWillAppear:animated];
     
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
-    [self prefersStatusBarHidden];
+//    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
     [self.navigationController setNavigationBarHidden:YES animated:NO];
     
     if (_captureSessionCoordinator != nil) {
@@ -197,8 +206,8 @@
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-    [super viewWillDisappear:animated];
-    [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
+//    [super viewWillDisappear:animated];
+//    [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
     
     [_captureSessionCoordinator stopRunning];
 }
@@ -257,6 +266,32 @@
     [_captureSessionCoordinator startRunning];
 }
 
+- (void)initHuafuLayer
+{
+    
+    CALayer *layer = [[CALayer alloc] init];
+    [layer setFrame:CGRectMake(0.0f, self.preview.layer.frame.size.height, self.view.frame.size.width,600.0f)];
+    [layer setBackgroundColor:[UIColor blackColor].CGColor];
+    [self.preview.layer addSublayer:layer];
+    self.maskHuafuLayer =layer;
+
+    
+    
+    
+    CALayer *layerCircle = [CALayer layer];
+    layerCircle.contents = (__bridge id _Nullable)(ImageNamed(@"frame_overlay_black.png")).CGImage;
+    self.maskCircleLayer = layerCircle;
+    [layerCircle setFrame:CGRectMake(0.0f, 0.0f, self.preview.layer.frame.size.width, self.preview.layer.frame.size.width)];
+    [self.preview.layer  addSublayer:layerCircle];
+    
+    
+    layerCircle.hidden = YES;
+    
+    
+
+}
+
+
 - (void)initProgressBar
 {
     self.progressBar = [[ProgressBar alloc]init];
@@ -290,6 +325,83 @@
     
 }
 
+
+- (void)initHuafuBtns
+{
+  
+    CGFloat buttonW = 80.0f;
+    self.recordButton = [[UIButton alloc] init];
+    [_recordButton setImage:ImageNamed(@"record_new_cam") forState:UIControlStateNormal];
+    [_recordButton setImage:ImageNamed(@"record_new_cam_highlighted") forState:UIControlStateHighlighted];
+    _recordButton.userInteractionEnabled = NO;
+    _recordButton.enabled = NO;
+    [self.view addSubview:_recordButton];
+    
+    
+//    UIView * huafuContentView = [[UIView alloc] init];
+//    [self.view addSubview:huafuContentView];
+//    [huafuContentView setBackgroundColor:[UIColor whiteColor]];
+//    huafuContentView.sd_layout.xIs(0.0f).rightEqualToView(self.view).heightIs(130).bottomSpaceToView(_recordButton,80);
+    
+    
+    UILabel *labelHuafu = [[UILabel alloc] init];
+    [labelHuafu setText:@"画幅"];
+    [self.view addSubview:labelHuafu];
+    labelHuafu.textColor = UIColorFromRGB(BABYCOLOR_record_text_normal);
+    labelHuafu.sd_layout.xIs(37.0f).widthIs(buttonW).heightIs(30).bottomSpaceToView(_recordButton,80);
+
+    
+    UILabel *labelShichang = [[UILabel alloc] init];
+    [labelShichang setText:@"时长"];
+    [self.view addSubview:labelShichang];
+    labelShichang.textColor = UIColorFromRGB(BABYCOLOR_record_text_normal);
+    labelShichang.sd_layout.xIs(37.0f).widthIs(buttonW).heightIs(30.0f).bottomSpaceToView(_recordButton,20.0f);
+
+  
+    
+    for (int i=0; i<5; i++) {
+        UIButton *selectSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        buttonSelect[i] = selectSender;
+        NSString *stringImageName = nil;
+        if(i==0)
+        {
+            stringImageName = [NSString stringWithFormat:@"buttonhua%d1",i];
+        }else
+        {
+            stringImageName = [NSString stringWithFormat:@"buttonhua%d0",i];
+        }
+        [selectSender setImage:ImageNamed(stringImageName) forState:UIControlStateNormal];
+        [selectSender addTarget:self action:@selector(selectSenderClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:selectSender];
+        selectSender.sd_layout.xIs(i*55.0f+120.0f).centerYEqualToView(labelHuafu).widthIs(25).heightIs(32.5f);
+    }
+    
+    
+    UIButton *selectTimeSender = [UIButton buttonWithType:UIButtonTypeCustom];
+    [selectTimeSender setTitle:@"9s" forState:UIControlStateNormal];
+    [self.view addSubview:selectTimeSender];
+    [selectTimeSender addTarget:self action:@selector(selectTimeClick:) forControlEvents:UIControlEventTouchUpInside];
+    buttonSelectTime[0] = selectTimeSender;
+    selectTimeSender.sd_layout.centerXEqualToView(buttonSelect[0]).centerYEqualToView(labelShichang).widthIs(25).heightIs(32.5f);
+    
+    
+    UIButton *allTimeSender = [UIButton buttonWithType:UIButtonTypeCustom];
+    [allTimeSender setTitle:@"任意时长" forState:UIControlStateNormal];
+    [allTimeSender setTitleColor:RGB(94.0f, 97.0f, 96.0f) forState:UIControlStateNormal];
+    [self.view addSubview:allTimeSender];
+    buttonSelectTime[1] = allTimeSender;
+    [allTimeSender addTarget:self action:@selector(selectTimeClick:) forControlEvents:UIControlEventTouchUpInside];
+    allTimeSender.sd_layout.centerYEqualToView(selectTimeSender).widthIs(80).heightIs(32.5f).leftEqualToView(buttonSelect[1]);
+    
+    
+    _recordButton.sd_layout
+    .widthIs(buttonW)
+    .heightIs(buttonW)
+    .centerXEqualToView(self.view)
+    .bottomSpaceToView(self.view, 40);
+    
+}
+
 - (void)initRecordButton
 {
     CGFloat buttonW = 80.0f;
@@ -309,20 +421,20 @@
 
 - (void)initOKButton
 {
-    CGFloat okButtonW = 50;
+    CGFloat okButtonW = 25.0f;
     self.okButton = [[UIButton alloc] init];
     _okButton.enabled = NO;
     
-    [_okButton setImage:ImageNamed(@"record_next_normal") forState:UIControlStateNormal];
-    [_okButton setImage:ImageNamed(@"record_next_press") forState:UIControlStateHighlighted];
+    [_okButton setImage:ImageNamed(@"record_undo_right") forState:UIControlStateNormal];
+    [_okButton setImage:ImageNamed(@"record_undo_right") forState:UIControlStateHighlighted];
     _okButton.hidden = YES;
     [_okButton addTarget:self action:@selector(pressOKButton) forControlEvents:UIControlEventTouchUpInside];
     
     [self.view addSubview:_okButton];
     
     _okButton.sd_layout
-    .widthIs(okButtonW)
-    .heightIs(okButtonW)
+    .widthIs(30.0f)
+    .heightIs(20.0f)
     .centerYEqualToView(_recordButton)
     .leftSpaceToView(_recordButton, 50);
 }
@@ -383,25 +495,36 @@
 
 - (void)initTopLayout
 {
+    
+    
+    UIView *colorBack = [[UIView alloc] init];
+    [colorBack setBackgroundColor:RGB(244.0f, 48.0f, 125.0f)];
+    [self.view addSubview:colorBack];
+    colorBack.sd_layout.xIs(0).yIs(0).widthIs(self.view.width).heightIs(50.0f);
+
+    
+    
     CGFloat buttonW = 36.0f;
     
     //关闭
     self.closeButton = [[UIButton alloc] init];
-    [_closeButton setImage:ImageNamed(@"record_cancel_normal") forState:UIControlStateNormal];
-    [_closeButton setImage:ImageNamed(@"record_cancel_normal") forState:UIControlStateDisabled];
-    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateSelected];
-    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateHighlighted];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateNormal];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateDisabled];
+//    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateSelected];
+//    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateHighlighted];
     [_closeButton addTarget:self action:@selector(pressCloseButton) forControlEvents:UIControlEventTouchUpInside];
     _closeButton.layer.zPosition = 1001;
     [self.view addSubview:_closeButton];
     
+    
     _closeButton.sd_layout
     .widthIs(buttonW)
     .heightIs(buttonW)
-    .topSpaceToView(self.view, 10)
+    .topSpaceToView(self.view, 15)
     .leftSpaceToView(self.view, 10);
     
     
+
     //前后摄像头转换
     self.switchButton = [[UIButton alloc] init];
     [_switchButton setImage:ImageNamed(@"record_camera_switch_normal") forState:UIControlStateNormal];
@@ -412,17 +535,20 @@
     _switchButton.layer.zPosition = 1001;
     [self.view addSubview:_switchButton];
     
+    
     _switchButton.sd_layout
-    .widthIs(buttonW)
-    .heightIs(buttonW)
-    .topSpaceToView(self.view, 10)
-    .rightSpaceToView(self.view, 10);
+    .widthIs(buttonW-6.0f)
+    .heightIs(buttonW-12.0f)
+    .topSpaceToView(self.view, 20)
+    .centerXEqualToView(self.view);
+    
     
     self.flashButton = [[UIButton alloc] init];
     [_flashButton setImage:ImageNamed(@"record_camera_flash_led_off_normal") forState:UIControlStateNormal];
     [_flashButton setImage:ImageNamed(@"record_camera_flash_led_off_normal") forState:UIControlStateDisabled];
     [_flashButton setImage:ImageNamed(@"record_camera_flash_led_off_pressed") forState:UIControlStateHighlighted];
     [_flashButton setImage:ImageNamed(@"record_camera_flash_led_on_normal") forState:UIControlStateSelected];
+    _flashButton.hidden = YES;
     
     _flashButton.layer.zPosition = 1001;
     [_flashButton addTarget:self action:@selector(pressFlashButton) forControlEvents:UIControlEventTouchUpInside];
@@ -440,6 +566,7 @@
     _focusRectView.image = ImageNamed(@"record_focus");
     _focusRectView.alpha = 0;
     [self.preview addSubview:_focusRectView];
+    
 }
 
 - (void)pressVideoImportButton
@@ -516,6 +643,8 @@
         
     }
 }
+
+
 
 - (void)closeDialog
 {
@@ -598,6 +727,7 @@
             [_deleteButton setButtonStyle:DeleteButtonStyleNormal];
         } else {
             [_deleteButton setButtonStyle:DeleteButtonStyleDisable];
+            [self showHuafuBtns];
         }
     }
 }
@@ -779,9 +909,10 @@
         // Disable the idle timer while recording
         [UIApplication sharedApplication].idleTimerDisabled = YES;
         
+        
         [self.captureSessionCoordinator startRecording];
         
-        
+        [self hiddenHuafuBtns];
         
     }
     
@@ -860,5 +991,127 @@
         [[UIApplication sharedApplication] openURL:setUrl];
     }
 }
+#pragma mark select huafu
+-(void)selectSenderClick:(UIButton *)sender
+{
+    for (int i=0; i<5; i++) {
+        if (sender==buttonSelect[i]) {
+            NSString *stringImageName = [NSString stringWithFormat:@"buttonhua%d1",i];
+            [buttonSelect[i] setImage:ImageNamed(stringImageName) forState:UIControlStateNormal];
+            switch (i) {
+                case 0:
+                    self.maskHuafuLayer.hidden = NO;
+                    [self changeMaskHuafu:480];
+                    self.maskCircleLayer.hidden = YES;
+
+                    break;
+                case 1:
+                    self.maskHuafuLayer.hidden = NO;
+                    [self changeMaskHuafu:360];
+                    self.maskCircleLayer.hidden = YES;
+
+                    break;
+                case 2:
+                    self.maskHuafuLayer.hidden = NO;
+                    [self changeMaskHuafu:240];
+                    self.maskCircleLayer.hidden = YES;
+
+                    break;
+                case 3:
+                    self.maskHuafuLayer.hidden = NO;
+                    [self changeMaskHuafu:120];
+                    self.maskCircleLayer.hidden = YES;
+
+                    break;
+                case 4:
+                    self.maskHuafuLayer.hidden = YES;
+                    [self changeMaskHuafu:480];
+                    self.maskCircleLayer.hidden = NO;
+                    break;
+
+                    
+                default:
+                    break;
+            }
+
+
+        }else
+        {
+            NSString *stringImageName = [NSString stringWithFormat:@"buttonhua%d0",i];
+            [buttonSelect[i] setImage:ImageNamed(stringImageName) forState:UIControlStateNormal];
+        }
+    }
+}
+
+//代理方法
+- (void)animationDidStart:(CAAnimation *)anim{
+    NSLog(@"START");
+}
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+    //如果不通过动画事务将隐式动画关闭，会出现动画运行完毕后会从起点突变到终点。
+//    [CATransaction begin];
+//    [CATransaction setDisableActions:YES];
+//    self.maskHuafuLayer.position = [[anim valueForKey:@"KPOINT"] CGPointValue];
+//    [CATransaction commit];
+}
+
+-(void)selectTimeClick:(UIButton *)sender
+{
+    
+        if (sender==buttonSelectTime[0]) {
+            [buttonSelectTime[0] setTitleColor:RGB(255.0f, 255.0f, 255.0f) forState:UIControlStateNormal];
+            [buttonSelectTime[1] setTitleColor:RGB(94.0f, 97.0f, 96.0f) forState:UIControlStateNormal];
+            
+        }else
+        {
+            [buttonSelectTime[1] setTitleColor:RGB(255.0f, 255.0f, 255.0f) forState:UIControlStateNormal];
+            [buttonSelectTime[0] setTitleColor:RGB(94.0f, 97.0f, 96.0f) forState:UIControlStateNormal];
+        }
+}
+
+-(void)changeMaskHuafu:(CGFloat)posY
+{
+    
+    
+    
+    CABasicAnimation *animation  = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.fromValue =  [NSValue valueWithCGPoint:self.maskHuafuLayer.position];
+    CGPoint toPoint = self.maskHuafuLayer.position;
+    toPoint.y = posY;
+    animation.toValue = [NSValue valueWithCGPoint:toPoint];
+    animation.delegate = self;
+    [self.maskHuafuLayer addAnimation:animation forKey:@"selectHuafu"];
+    
+    [self.maskHuafuLayer setFrame:CGRectMake(0.0f, toPoint.y, self.view.frame.size.width,self.maskHuafuLayer.frame.size.height)];
+    
+    
+//    CABasicAnimation *boundsAnimation = [CABasicAnimation animationWithKeyPath:@"bounds"];
+//    boundsAnimation.fromValue = [NSValue valueWithCGRect:CGRectMake(0.0f, self.preview.layer.frame.size.height, self.view.frame.size.width,0.f)];
+//    boundsAnimation.toValue = [NSValue valueWithCGRect:CGRectMake(0.0f,260, self.view.frame.size.width,self.preview.layer.frame.size.height-260.0f)];
+//
+//    [self.maskHuafuLayer addAnimation:boundsAnimation forKey:@"selectHuafu"];
+//
+//    [self.maskHuafuLayer setFrame:CGRectMake(0.0f, 260, self.view.frame.size.width,self.preview.layer.frame.size.height-260.0f)];
+    
+}
+
+-(void)hiddenHuafuBtns
+{
+    for (int i=0; i<5; i++) {
+        buttonSelect[i].hidden = YES;
+    }
+    buttonSelectTime[0].hidden = YES;
+    buttonSelectTime[1].hidden = YES;
+}
+-(void)showHuafuBtns
+{
+    for (int i=0; i<5; i++) {
+        buttonSelect[i].hidden = NO;
+    }
+    buttonSelectTime[0].hidden = NO;
+    buttonSelectTime[1].hidden = NO;
+}
+
 
 @end

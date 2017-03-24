@@ -204,11 +204,11 @@ typedef NS_ENUM( NSInteger, RecordingStatus )
         }
         if ([self.mMediaObject getRealDuration] >= self.mMediaObject.mMaxDuration) {
             
-            
             DLog(@"[self.mMediaObject getRealDuration] : %d", [self.mMediaObject getRealDuration]);
             DLog(@"self.mMediaObject.mMaxDuration : %d", self.mMediaObject.mMaxDuration);
             
             DLog(@"视频总长达到最大");
+            
             return;
         }
         [self transitionToRecordingStatus:RecordingStatusStartingRecording error:nil];
@@ -218,6 +218,7 @@ typedef NS_ENUM( NSInteger, RecordingStatus )
     
     MediaPart *mMediaPart = [self.mMediaObject buildMediaPart:mCameraId videoSuffix:@".mp4"];
     self.mMediaObject.isRecording = YES;
+    
     DLog(@"mMediaPart : mediaPath : %@", mMediaPart.mediaPath);
     self.assetWriterCoordinator = [[BabyAssetWriterCoordinator alloc] initWithURL:mMediaPart.mediaPath];
     [_assetWriterCoordinator setIsFrontCanera:self.isUsingFrontCamera];
@@ -226,10 +227,13 @@ typedef NS_ENUM( NSInteger, RecordingStatus )
     }
     [_assetWriterCoordinator addVideoTrackWithSourceFormatDescription:self.outputVideoFormatDescription settings:_videoCompressionSettings];
     
-    dispatch_queue_t callbackQueue = dispatch_queue_create( "com.mengbaopai.capturesession.writercallback", DISPATCH_QUEUE_SERIAL ); // guarantee ordering of callbacks with a serial queue
+    dispatch_queue_t callbackQueue = dispatch_queue_create("com.mengbaopai.capturesession.writercallback", DISPATCH_QUEUE_SERIAL ); // guarantee ordering of callbacks with a serial queue
     [_assetWriterCoordinator setDelegate:self callbackQueue:callbackQueue];
     [_assetWriterCoordinator prepareToRecord]; // asynchronous, will call us back with recorderDidFinishPreparing: or recorder:didFailWithError: when done
+    
 }
+
+
 
 - (void)stopRecording
 {
