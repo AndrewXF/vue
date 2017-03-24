@@ -65,7 +65,7 @@ namespace AVR {
         
         ~VideoRecorderImpl();
         
-        bool SetVideoOptions(VideoFrameFormat fmt, int width, int height, int srcHight,
+        bool SetVideoOptions(VideoFrameFormat fmt, const char *overlay, int width, int height, int srcHight,
                              int cameraSelection, unsigned long bitrate);
         
         bool SetVideoOptionsInfo(int srcHight, int cameraSelection);
@@ -96,6 +96,27 @@ namespace AVR {
         void open_video();
         
         void write_video_frame(AVStream *st);
+        
+        
+        
+        
+        
+        uint8_t *YUV420spCrop(const uint8_t *data, int imageW, int imageH, int newImageH);
+        
+        uint8_t *rotateYUV420Degree180(const uint8_t *data, int imageWidth, int imageHeight);
+        
+        uint8_t *YUV420spRotate90(const uint8_t *data, int imageWidth, int imageHeight);
+        
+        uint8_t *YUV420spRotate90(const uint8_t *src, int srcWidth, int height, int mode);
+        
+        uint8_t *YUV420spRotateNegative90(const uint8_t *data, int imageWidth, int imageHeight);
+        
+        
+        
+        
+        
+        
+        
         
         int init_filters(const char *filters_descr);
         
@@ -137,6 +158,9 @@ namespace AVR {
         uint8_t *video_outbuf;
         int video_outbuf_size;
         AVStream *video_st;
+        
+        const char *video_overlay;
+        
         
         int video_width;
         int video_height;
@@ -230,17 +254,31 @@ namespace AVR {
         
         ALOGE("init filters start");
         
+        char args[512];
+        char argsAll[512];
+        
         if(video_cameraSelection == 0) {
             //后置摄像头
-            filter_descr = "transpose=1[scl];[scl]crop=480:480";
+            snprintf(args, sizeof(args),"transpose=1[scl];[scl]crop=480:%d:0:0", video_height);
+            //filter_descr = "transpose=1[scl];[scl]crop=480:480";
         } else {
             // 前置摄像头
-            filter_descr = "transpose=1[scl];[scl]hflip[sc2];[sc2]crop=480:480";
+            snprintf(args, sizeof(args),"transpose=1[scl];[scl]hflip[sc2];[sc2]crop=480:%d:0:0", video_height);
+            //filter_descr = "transpose=2[scl];[scl]hflip[sc2];[sc2]crop=480:480";
         }
         
-        init_filters(filter_descr);
-        ALOGE("init filters end");
-        
+        if (strcmp(video_overlay, "null") == 0) {
+            ALOGE("filters : %s", args);
+            init_filters(args);
+            ALOGE("init filters end");
+        } else {
+            snprintf(argsAll, sizeof(argsAll),"movie=%s [watermark];[in]%s[trans]; [trans][watermark] overlay=0:0 [out]",
+                     video_overlay, args);
+            ALOGE("filters argsAll : %s", argsAll);
+            init_filters(argsAll);
+            ALOGE("init filters end");
+        }
+
         if (avio_open(&oc->pb, mp4file, AVIO_FLAG_WRITE) < 0) {
             ALOGE("could not open '%s'\n", mp4file);
             return false;
@@ -258,11 +296,10 @@ namespace AVR {
     }
     
     AVStream *VideoRecorderImpl::add_audio_stream(enum AVCodecID codec_id) {
-        AVCodecContext *audioContext;
+        AVCodecContext *c;
         AVStream *st;
         
         audio_codec = avcodec_find_encoder(codec_id);
-        audio_codec = avcodec_find_encoder_by_name("libfaac");
         if (!audio_codec) {
             ALOGE("audio_codec not found\n");
             return NULL;
@@ -274,22 +311,18 @@ namespace AVR {
             return NULL;
         }
         st->id = oc->nb_streams - 1;
-        audioContext = st->codec;
-//        avcodec_get_context_defaults3(audioContext, audio_codec);
-//        c = avcodec_alloc_context3(audio_codec);
-        audioContext->strict_std_compliance = FF_COMPLIANCE_UNOFFICIAL; // for native aac support
-        audioContext->codec_id = codec_id;
-        audioContext->codec_type = AVMEDIA_TYPE_AUDIO;
-        audioContext->sample_fmt = audio_sample_format;
-        audioContext->bit_rate = audio_bit_rate;
-        audioContext->sample_rate = (int)audio_sample_rate;
-        audioContext->channels = audio_channels;
-        audioContext->channel_layout = AV_CH_LAYOUT_MONO;
-        audioContext->profile = FF_PROFILE_AAC_LOW;
-        if (oc->oformat->flags & AVFMT_GLOBALHEADER)
-            audioContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        c = st->codec;
+        c->codec_id = codec_id;
+        c->codec_type = AVMEDIA_TYPE_AUDIO;
+        c->sample_fmt = audio_sample_format;
+        c->bit_rate = audio_bit_rate;
+        c->sample_rate = audio_sample_rate;
+        c->channels = audio_channels;
+        c->channel_layout = AV_CH_LAYOUT_MONO;
+        c->profile = FF_PROFILE_AAC_LOW;
         
-        ALOGE("add_audio_stream c->channels : %d \n", audioContext->channels);
+        if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+            c->flags |= CODEC_FLAG_GLOBAL_HEADER;
         
         return st;
     }
@@ -382,7 +415,7 @@ namespace AVR {
     }
     
     AVStream *VideoRecorderImpl::add_video_stream(enum AVCodecID codec_id) {
-        AVCodecContext *videoContext;
+        AVCodecContext *c;
         AVStream *st;
         
         video_codec = avcodec_find_encoder(codec_id);
@@ -397,23 +430,22 @@ namespace AVR {
             return NULL;
         }
         st->id = oc->nb_streams - 1;
-        videoContext = st->codec;
-//        c = avcodec_alloc_context3(video_codec);
+        c = st->codec;
         //编码器的ID号，这里我们自行指定为264编码器，实际上也可以根据video_st里的codecID 参数赋值
-        videoContext->codec_id = codec_id;
+        c->codec_id = codec_id;
         //编码器编码的数据类型
-        videoContext->codec_type = AVMEDIA_TYPE_VIDEO;
+        c->codec_type = AVMEDIA_TYPE_VIDEO;
         
         /* put sample parameters */
-        videoContext->rc_min_rate = video_bitrate;
-        videoContext->rc_max_rate = video_bitrate;
+        c->rc_min_rate = video_bitrate;
+        c->rc_max_rate = video_bitrate;
         
         //目标的码率，即采样的码率；显然，采样码率越大，视频大小越大
-        videoContext->bit_rate = video_bitrate;
+        c->bit_rate = video_bitrate;
         //固定允许的码率误差，数值越大，视频越小
-        videoContext->bit_rate_tolerance = 4000000;
-        videoContext->width = video_width;
-        videoContext->height = video_height;
+        c->bit_rate_tolerance = 4000000;
+        c->width = video_width;
+        c->height = video_height;
         
         //帧率的基本单位，我们用分数来表示，
         //用分数来表示的原因是，有很多视频的帧率是带小数的eg：NTSC 使用的帧率是29.97
@@ -428,66 +460,230 @@ namespace AVR {
         
         //	c->time_base.num = 1;
         //	c->time_base.den = 90000; /* 15 images/s */
-        videoContext->time_base = (AVRational) {1, 90000};
+        c->time_base = (AVRational) {1, 90000};
         //像素的格式，也就是说采用什么样的色彩空间来表明一个像素点
-        videoContext->pix_fmt = AV_PIX_FMT_YUV420P; // we convert everything to PIX_FMT_YUV420P
+        c->pix_fmt = AV_PIX_FMT_YUV420P; // we convert everything to PIX_FMT_YUV420P
         
         // http://stackoverflow.com/questions/3553003/encoding-h-264-with-libavcodec-x264
         
         /*x264 ultrafast preset*/
-        videoContext->delay = 0;
-        videoContext->thread_count = 0;
+        c->delay = 0;
+        c->thread_count = 0;
         //两个非B帧之间允许出现多少个B帧数
         //设置0表示不使用B帧
         //b 帧越多，图片越小
-        videoContext->max_b_frames = 0; // bframes = 0
+        c->max_b_frames = 0; // bframes = 0
         //	//运动估计
         //	c->pre_me = 2;
-        videoContext->me_method = ME_HEX; // me = dia !!!
-        videoContext->refs = 1; // ref = 1
+        c->me_method = ME_HEX; // me = dia !!!
+        c->refs = 1; // ref = 1
         //	c->me_cmp|= 1;
-        videoContext->scenechange_threshold = 40;
-        videoContext->trellis = 0; // trellis = 0
+        c->scenechange_threshold = 40;
+        c->trellis = 0; // trellis = 0
         //	c->coder_type = 0;
         //	c->me_subpel_quality = 10;
         //	c->me_range = 16;
         //每250帧插入1个I帧，I帧越少，视频越小  250
-        videoContext->gop_size = 12;
+        c->gop_size = 12;
         //	c->keyint_min = 25;
         //	c->trellis=0;
-        videoContext->i_quant_factor = 0.71;
-        videoContext->b_frame_strategy = 0;
+        c->i_quant_factor = 0.71;
+        c->b_frame_strategy = 0;
         //	c->qcompress = 0.6;
         //设置最小和最大拉格朗日乘数
         //拉格朗日乘数 是统计学用来检测瞬间平均值的一种方法
         //	c->lmin = 1;
         //	c->lmax = 5;
         //最大和最小量化系数
-        videoContext->qmin = 10;
-        videoContext->qmax = 30;
+        c->qmin = 10;
+        c->qmax = 30;
         //因为我们的量化系数q是在qmin和qmax之间浮动的，
         //qblur表示这种浮动变化的变化程度，取值范围0.0～1.0，取0表示不削减
         //	c->qblur = 0.0;
         //	c->max_qdiff = 4;
-        videoContext->flags |= CODEC_FLAG_LOOP_FILTER;
-        videoContext->level = 30;
-        videoContext->profile = FF_PROFILE_H264_BASELINE;
+        c->flags |= CODEC_FLAG_LOOP_FILTER;
+        c->level = 30;
+        c->profile = FF_PROFILE_H264_BASELINE;
         
         if (oc->oformat->flags & AVFMT_GLOBALHEADER)
-            videoContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+            c->flags |= CODEC_FLAG_GLOBAL_HEADER;
         
-        av_opt_set(videoContext->priv_data, "subq", "6", 0);
-        av_opt_set(videoContext->priv_data, "crf", "20.0", 0);
-        av_opt_set(videoContext->priv_data, "weighted_p_pred", "0", 0);
-        av_opt_set(videoContext->priv_data, "preset", "ultrafast", 0);
-        av_opt_set(videoContext->priv_data, "tune", "zerolatency", 0);
-        av_opt_set(videoContext->priv_data, "x264opts", "rc-lookahead=0", 0);
-        av_opt_set(videoContext->priv_data, "x264opts", "sync_lookahead=0", 0);
-        av_opt_set(videoContext->priv_data, "sync_lookahead", "0", 0);
+        av_opt_set(c->priv_data, "subq", "6", 0);
+        av_opt_set(c->priv_data, "crf", "20.0", 0);
+        av_opt_set(c->priv_data, "weighted_p_pred", "0", 0);
+        av_opt_set(c->priv_data, "preset", "ultrafast", 0);
+        av_opt_set(c->priv_data, "tune", "zerolatency", 0);
+        av_opt_set(c->priv_data, "x264opts", "rc-lookahead=0", 0);
+        av_opt_set(c->priv_data, "x264opts", "sync_lookahead=0", 0);
+        av_opt_set(c->priv_data, "sync_lookahead", "0", 0);
         
         
+        //	c->time_base.num = 1;
+        //	c->time_base.den = 90000; /* 15 images/s */
+        //	c->pix_fmt = PIX_FMT_YUV420P; // we convert everything to PIX_FMT_YUV420P
+        //
+        //	// http://stackoverflow.com/questions/3553003/encoding-h-264-with-libavcodec-x264
+        //
+        //	/*x264 ultrafast preset*/
+        //	c->delay = 0;
+        //	c->thread_count = 0;
+        //	c->max_b_frames = 0; // bframes = 0
+        //	c->me_method = ME_HEX; // me = dia !!!
+        //	c->refs = 1; // ref = 1
+        //	c->scenechange_threshold = 40;
+        //	c->trellis = 0; // trellis = 0
+        //	c->coder_type = 0;
+        //	c->me_subpel_quality = 8;
+        //	c->me_range = 16;
+        //	c->gop_size = 0; //缂栫爜寤惰繜璺熻繖涓湁鍏崇郴鍝巭~
+        //	c->keyint_min = 25;
+        //	c->i_quant_factor = 0.71f;
+        //	c->b_frame_strategy = 0;
+        //	c->qcompress = 0.6f;
+        //	c->qmin = 10;
+        //	c->qmax = 30;
+        //	c->max_qdiff = 4;
+        //	c->flags |= CODEC_FLAG_LOOP_FILTER;
+        //
+        //	c->profile = FF_PROFILE_H264_BASELINE;
+        //
+        //	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+        //		c->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        //
+        //	av_opt_set(c->priv_data,"subq","6",0);
+        //	av_opt_set(c->priv_data,"crf","20.0",0);
+        //	av_opt_set(c->priv_data,"weighted_p_pred","0",0);
+        //	av_opt_set(c->priv_data, "preset", "ultrafast", 0);
+        //	av_opt_set(c->priv_data, "tune", "zerolatency", 0);
+        //	av_opt_set(c->priv_data,"x264opts","rc-lookahead=0",0);
+        //	av_opt_set(c->priv_data, "x264opts", "sync_lookahead=0", 0);
+        //	av_opt_set(c->priv_data, "sync_lookahead", "0", 0);
         return st;
     }
+    
+    
+    uint8_t *VideoRecorderImpl::YUV420spCrop(const uint8_t *data, int imageW, int imageH,int newImageH) {
+//        ALOG("YUV420spCrop imageW = %d, imageH = %d, newImageH = %d", imageW, imageH, newImageH);
+        int cropH;
+        int i, j, count, tmp;
+        uint8_t *yuv = new uint8_t[imageW * imageH * 3 / 2];
+        cropH = 0;
+        
+        count = 0;
+        for (j = cropH; j < cropH + newImageH; j++) {
+            for (i = 0; i < imageW; i++) {
+                yuv[count++] = data[j * imageW + i];
+            }
+        }
+        
+        // Cr Cb
+        tmp = imageH + cropH / 2;
+        for (j = tmp; j < tmp + newImageH / 2; j++) {
+            for (i = 0; i < imageW; i++) {
+                yuv[count++] = data[j * imageW + i];
+            }
+        }
+//        ALOG("YUV420spCrop end");
+        return yuv;
+    }
+    
+    uint8_t *VideoRecorderImpl::rotateYUV420Degree180(const uint8_t *data, int imageWidth,
+                                                      int imageHeight) {
+        uint8_t *yuv = new uint8_t[imageWidth * imageHeight * 3 / 2];
+        int i = 0;
+        int count = 0;
+        
+        for (i = imageWidth * imageHeight - 1; i >= 0; i--) {
+            yuv[count] = data[i];
+            count++;
+        }
+        
+        i = imageWidth * imageHeight * 3 / 2 - 1;
+        for (i = imageWidth * imageHeight * 3 / 2 - 1; i >= imageWidth
+             * imageHeight; i -= 2) {
+            yuv[count++] = data[i - 1];
+            yuv[count++] = data[i];
+        }
+        return yuv;
+    }
+    
+    uint8_t *VideoRecorderImpl::YUV420spRotate90(const uint8_t *data, int imageWidth,
+                                                 int imageHeight) {
+//        ALOG("YUV420spRotate90 imageWidth = %d, imageHeight = %d", imageWidth, imageHeight);
+        uint8_t *yuv = new uint8_t[imageWidth * imageHeight * 3 / 2];
+        // Rotate the Y luma
+        int i = 0;
+        for (int x = 0; x < imageWidth; x++) {
+            for (int y = imageHeight - 1; y >= 0; y--) {
+                yuv[i] = data[y * imageWidth + x];
+                i++;
+            }
+            
+        }
+        // Rotate the U and V color components
+        i = imageWidth * imageHeight * 3 / 2 - 1;
+        for (int x = imageWidth - 1; x > 0; x = x - 2) {
+            for (int y = 0; y < imageHeight / 2; y++) {
+                yuv[i] = data[(imageWidth * imageHeight) + (y * imageWidth) + x];
+                i--;
+                yuv[i] = data[(imageWidth * imageHeight) + (y * imageWidth)
+                              + (x - 1)];
+                i--;
+            }
+        }
+        return yuv;
+    }
+    
+    uint8_t *VideoRecorderImpl::YUV420spRotateNegative90(const uint8_t *data, int imageWidth,
+                                                         int imageHeight) {
+        uint8_t *yuv = new uint8_t[imageWidth * imageHeight * 3 / 2];
+        int nWidth = 0, nHeight = 0;
+        int wh = 0;
+        int uvHeight = 0;
+        if (imageWidth != nWidth || imageHeight != nHeight) {
+            nWidth = imageWidth;
+            nHeight = imageHeight;
+            wh = imageWidth * imageHeight;
+            uvHeight = imageHeight >> 1;// uvHeight = height / 2
+        }
+        
+        // 旋转Y
+        int k = 0;
+        for (int i = 0; i < imageWidth; i++) {
+            int nPos = 0;
+            for (int j = 0; j < imageHeight; j++) {
+                yuv[k] = data[nPos + i];
+                k++;
+                nPos += imageWidth;
+            }
+        }
+        
+        for (int i = 0; i < imageWidth; i += 2) {
+            int nPos = wh;
+            for (int j = 0; j < uvHeight; j++) {
+                yuv[k] = data[nPos + i];
+                yuv[k + 1] = data[nPos + i + 1];
+                k += 2;
+                nPos += imageWidth;
+            }
+        }
+        
+        return rotateYUV420Degree180(yuv, imageWidth, imageHeight);
+    }
+    
+    uint8_t *VideoRecorderImpl::YUV420spRotate90(const uint8_t *src, int srcWidth, int height,
+                                                 int mode) {
+        switch (mode) {
+            case 1:
+                return YUV420spRotate90(src, srcWidth, height);
+            case -1:
+                return YUV420spRotateNegative90(src, srcWidth, height);
+            default:
+                return NULL;
+        }
+    }
+    
+    
     
     void VideoRecorderImpl::open_video() {
         AVCodecContext *videoOpenContext;
@@ -681,7 +877,7 @@ namespace AVR {
         return true;
     }
     
-    bool VideoRecorderImpl::SetVideoOptions(VideoFrameFormat fmt, int width, int height,
+    bool VideoRecorderImpl::SetVideoOptions(VideoFrameFormat fmt, const char *overlay, int width, int height,
                                             int srcHight, int cameraSelection,
                                             unsigned long bitrate) {
         switch (fmt) {
@@ -725,9 +921,10 @@ namespace AVR {
                 video_pixfmt = AV_PIX_FMT_BGR565BE;
                 break;
             default:
-                ALOGE("Unknown frame format passed to SetVideoOptions!\n");
+               // LOGE("Unknown frame format passed to SetVideoOptions!\n");
                 return false;
         }
+        video_overlay = overlay;
         video_width = width;
         video_height = height;
         video_srcHight = srcHight;
@@ -735,7 +932,6 @@ namespace AVR {
         video_bitrate = bitrate;
         return true;
     }
-    
     bool VideoRecorderImpl::SetVideoOptionsInfo(int srcHight, int cameraSelection) {
         
         video_srcHight = srcHight;
@@ -1041,15 +1237,14 @@ namespace AVR {
 
 AVR::VideoRecorder *recorder;
 
-int initRecorder(char *fileName, int srcHight, int cameraSelection, unsigned long audioBitrate,
-                 unsigned long videoBitrate, int hasAudio) {
+int initRecorder(char *fileName, int srcHight, int outputHeight, int cameraSelection, long audioBitrate, long videoBitrate, int hasAudio, char *overlayName) {
     recorder = new AVR::VideoRecorderImpl();
     //mProfile.audioBitRate = 96000 , mProfile.audioSampleRate = 48000 , mProfile.videoBitRate = 6000000 , mProfile.videoFrameRate = 30
     ALOGV("fileName is %s , audioBitrate is %ld , videoBitrate is %ld , srcHight is %d , cameraSelection is %d \n",
         fileName, audioBitrate, videoBitrate, srcHight, cameraSelection);
+    
     recorder->SetAudioOptions(AVR::AudioSampleFormatS16, 1, 44100, audioBitrate);
-    recorder->SetVideoOptions(AVR::VideoFrameFormatNV12, 480, 480, srcHight, cameraSelection,
-                              videoBitrate);
+    recorder->SetVideoOptions(AVR::VideoFrameFormatNV21, overlayName, 480, outputHeight, srcHight, cameraSelection,videoBitrate);
     
     if (hasAudio > 0)
         recorder->Open(fileName, true, true);

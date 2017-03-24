@@ -52,7 +52,7 @@ namespace AVR {
         // Return true on success, false on failure
         
         // Call these first
-        virtual bool SetVideoOptions(VideoFrameFormat fmt, int width, int height, int srcHight, int cameraSelection, unsigned long bitrate)=0;
+        virtual bool SetVideoOptions(VideoFrameFormat fmt, const char *overlay, int width, int height, int srcHight, int cameraSelection, unsigned long bitrate)=0;
         virtual bool SetVideoOptionsInfo(int srcHight, int cameraSelection)=0;
         virtual bool SetAudioOptions(AudioSampleFormat fmt, int channels, unsigned long samplerate, unsigned long bitrate)=0;
         
@@ -72,7 +72,7 @@ namespace AVR {
     };
     
 } // namespace AVR
-int initRecorder(char *fileName, int srcHight, int cameraSelection, unsigned long audioBitrate, unsigned long videoBitrate, int hasAudio);
+int initRecorder(char *fileName, int srcHight, int outputHeight, int cameraSelection, long audioBitrate, long videoBitrate, int hasAudio, char *overlayName);
 int setRecorderInfo(int srcHight, int cameraSelection);
 int recordeVideo(const void *frame, unsigned long timestamp);
 int recordeAudio(void *samples, unsigned long numSamples);

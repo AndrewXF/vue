@@ -17,7 +17,7 @@
 
 - (void)setDelegate:(id<VideoRecorderCoordinatorDelegate>)delegate callbackQueue:(dispatch_queue_t)delegateCallbackQueue;
 
-- (void)coorInitRecorder:(NSString *)fileName srcHight:(int)srcHight cameraSelection:(int)cameraSelection audioBitrate:(long)audioBitrate videoBitrate:(long)videoBitrate hasAudio:(int)hasAudio;
+- (void)coorInitRecorder:(NSString *)fileName srcHight:(int)srcHight videoHeight:(int)videoH cameraSelection:(int)cameraSelection audioBitrate:(long)audioBitrate videoBitrate:(long)videoBitrate hasAudio:(int)hasAudio overFile:(NSString *)overFileName;
 
 - (void)coorSetRecorderInfo:(int)srcHight cameraSelection:(int)cameraSelection;
 

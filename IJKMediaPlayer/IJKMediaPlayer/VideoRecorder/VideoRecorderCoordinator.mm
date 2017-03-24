@@ -27,9 +27,11 @@
     }
 }
 
-- (void)coorInitRecorder:(NSString *)fileName srcHight:(int)srcHight cameraSelection:(int)cameraSelection audioBitrate:(long)audioBitrate videoBitrate:(long)videoBitrate hasAudio:(int)hasAudio
+- (void)coorInitRecorder:(NSString *)fileName srcHight:(int)srcHight videoHeight:(int)videoH cameraSelection:(int)cameraSelection audioBitrate:(long)audioBitrate videoBitrate:(long)videoBitrate hasAudio:(int)hasAudio overFile:(NSString *)overFileName
 {
-    initRecorder((char*)[fileName UTF8String], srcHight, cameraSelection, audioBitrate, videoBitrate, hasAudio);
+    
+    //改
+    initRecorder((char*)[fileName UTF8String], srcHight,videoH, cameraSelection, audioBitrate, videoBitrate, hasAudio,(char*)[overFileName UTF8String]);
     
     if ([self.delegate respondsToSelector:@selector(recorder:didFinishInit:)]) {
         [self.delegate recorder:self didFinishInit:nil];
