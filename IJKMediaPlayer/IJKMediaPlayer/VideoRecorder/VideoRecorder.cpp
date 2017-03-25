@@ -356,11 +356,11 @@ namespace AVR {
         
         
         src_nb_samples =
-        audioOpenContext->codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE ?
-        10000 : audioOpenContext->frame_size;
-        
-        ALOGE("src_nb_samples : %d \n", src_nb_samples);
-        ALOGE("c->channels : %d \n", audioOpenContext->channels);
+//        audioOpenContext->codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE ?
+//        10000 : audioOpenContext->frame_size;
+//        
+//        ALOGE("src_nb_samples : %d \n", src_nb_samples);
+//        ALOGE("c->channels : %d \n", audioOpenContext->channels);
         
         ret = av_samples_alloc_array_and_samples(&src_samples_data,
                                                  &src_samples_linesize, audioOpenContext->channels, src_nb_samples,

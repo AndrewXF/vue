@@ -4,7 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>IJKMediaFramework.xcscheme</key>
+		<key>Vue.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
@@ -12,12 +12,7 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>E654EA891B6B27E600B0F2D0</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>E654EA931B6B27E600B0F2D0</key>
+		<key>55D5BE3E1E79153900911777</key>
 		<dict>
 			<key>primary</key>
 			<true/>

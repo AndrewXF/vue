@@ -47,7 +47,7 @@
     };
     
     int ret = video_merge(argc, argv, progress, completion);
-    NSLog(@"encoder finish : %d", ret);
+    NSLog(@"encoder finish : :%d", ret);
 }
 
 - (void) videoMerge:(int)argc withArgv:(char **)argv progress:(OnEncoderProgressBlock)progressBlock completion:(OnEncoderCompletionBlock)completionBlock
