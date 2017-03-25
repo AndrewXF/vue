@@ -35,6 +35,7 @@
 #define SCREEN_ORIGIN_H (SCREEN_HEIGHT * SCREEN_SCALE)
 #define APP_WIDTH ([[UIScreen mainScreen]applicationFrame].size.width)
 #define APP_HEIGHT ([[UIScreen mainScreen]applicationFrame].size.height)
+#define SCREEN_FACTORY  320.f/SCREEN_WIDTH
 
 //-------------------获取设备大小-------------------------
 

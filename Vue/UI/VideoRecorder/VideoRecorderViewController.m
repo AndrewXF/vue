@@ -54,6 +54,7 @@
 @property (strong, nonatomic) UIButton *settingButton;
 @property (strong, nonatomic) UIButton *recordButton;
 @property (strong, nonatomic) UIButton *flashButton;
+@property (assign,nonatomic) CGFloat maxTotalTime;
 
 @property (strong, nonatomic) GXCustomButton *videoImportButton;
 @property (strong, nonatomic) GXCustomButton *imageImportButton;
@@ -1062,11 +1063,19 @@
         if (sender==buttonSelectTime[0]) {
             [buttonSelectTime[0] setTitleColor:RGB(255.0f, 255.0f, 255.0f) forState:UIControlStateNormal];
             [buttonSelectTime[1] setTitleColor:RGB(94.0f, 97.0f, 96.0f) forState:UIControlStateNormal];
+            self.maxTotalTime = 9.0f*1000.0f;
+            self.mMediaObject.mMaxDuration = DEFAULT_MAX_DURATION;
+
             
         }else
         {
+            
             [buttonSelectTime[1] setTitleColor:RGB(255.0f, 255.0f, 255.0f) forState:UIControlStateNormal];
             [buttonSelectTime[0] setTitleColor:RGB(94.0f, 97.0f, 96.0f) forState:UIControlStateNormal];
+            self.maxTotalTime =  10.0f*60.0f*1000.0f;
+            self.mMediaObject.mMaxDuration = 10*60*1000;
+            
+
         }
 }
 

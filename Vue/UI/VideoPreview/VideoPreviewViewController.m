@@ -401,9 +401,7 @@
     .heightIs(36)
     .rightSpaceToView(self.view, 120)
     .bottomSpaceToView(line, 4);
-    
-    
-    
+
     
 }
 
@@ -528,6 +526,9 @@
         [mutableArray addObject:@"-i"];
         [mutableArray addObject:_mVideoTempPath];
         [mutableArray addObject:@"-itsoffset"];
+        
+       
+        
         [mutableArray addObject:[NSString stringWithFormat:@"%d",(videoTime - 2)]];
         [mutableArray addObject:@"-i"];
         [mutableArray addObject:[_mThemeCommonPath stringByAppendingPathComponent:@"tail.mp4"]];
@@ -627,7 +628,7 @@
         [encoder videoMerge:array progress:progressBlock completion:block];
     });
     
-    
+
 }
 
 - (void)saveToUploadInfo
@@ -704,6 +705,8 @@
     VideoPublishViewController *publishVC = [[VideoPublishViewController alloc]init];
     publishVC.uploadEntity = uploadInfo;
     publishVC.fromDraft = _fromDraft;
+    publishVC.mMediaObject = self.mMediaObject;
+    publishVC.videoFilter = self.videoFilter;
     
     publishVC.savedDraft = ^(BOOL saved) {
         if (self.savedDraft) {

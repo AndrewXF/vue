@@ -24,7 +24,6 @@
 #import "BabyPinUpload.h"
 
 
-
 #import "PublishLocationViewController.h"
 #import "PublishTitlePageViewController.h"
 
@@ -93,6 +92,7 @@
     [colorBack setBackgroundColor:RGB(244.0f, 48.0f, 125.0f)];
     [self.view addSubview:colorBack];
     colorBack.sd_layout.xIs(0).yIs(0).widthIs(self.view.width).heightIs(50.0f);
+
     
     
     
@@ -100,23 +100,28 @@
     
     publishButton.titleLabel.font = kFontSize(18);
     [publishButton addTarget:self action:@selector(pressPublishButton) forControlEvents:UIControlEventTouchUpInside];
-    [publishButton setImageRight:[UIImage imageNamed:@"ic_share_arrow"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [publishButton setImageRight:[UIImage imageNamed:@"ic_share_arrow"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
-    [publishButton setBackgroundImage:ImageNamed(@"baby_color_red_height") forState:UIControlStateNormal];
-    [publishButton setBackgroundImage:ImageNamed(@"baby_color_red_base") forState:UIControlStateHighlighted];
+    [publishButton setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [publishButton setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
     [self.view addSubview:publishButton];
     
+    publishButton.sd_layout.xIs(self.view.frame.size.width*1.0f/4.0f).bottomEqualToView(self.view).widthIs(51.0f*SCREEN_FACTORY).heightIs(SCREEN_FACTORY*51.0f);
     
     
-    _topImage = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_WIDTH)];
-    [self.view addSubview:_topImage];
     
-    _scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, (SCREEN_HEIGHT - NavigationBar_HEIGHT))];
-    _scrollView.bounces = YES;
-    _scrollView.alwaysBounceVertical = YES;
-    _scrollView.layer.zPosition = 10;
-    [self.view addSubview:_scrollView];
+    UIButton *publishButtonSave = [[UIButton alloc]initWithFrame:CGRectMake(0, (SCREEN_HEIGHT - NavigationBar_HEIGHT), SCREEN_WIDTH, NavigationBar_HEIGHT)];
     
+    publishButtonSave.titleLabel.font = kFontSize(18);
+    [publishButtonSave addTarget:self action:@selector(savedButton) forControlEvents:UIControlEventTouchUpInside];
+    [publishButtonSave setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [publishButtonSave setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+
+    [self.view addSubview:publishButtonSave];
+    
+    
+    publishButtonSave.sd_layout.centerXIs(self.view.frame.size.width*3.0f/4.0f).bottomEqualToView(self.view).widthIs(51.0f*SCREEN_FACTORY).heightIs(SCREEN_FACTORY*51.0f);
+    
+    
+
     CGSize leftTexttSize = [@"返回" sizeWithAttributes:@{NSFontAttributeName: kFontSize(18)}];
     UIButton *backButton = [[UIButton alloc]initWithFrame:CGRectMake(4, (NavigationBar_HEIGHT - leftTexttSize.height) / 2, leftTexttSize.width + 32, leftTexttSize.height + 4)];
     backButton.titleLabel.font = kFontSize(18);
@@ -133,122 +138,70 @@
     title.layer.zPosition = 1000;
     [self.view addSubview:title];
     
-    CGFloat imageW = 160;
-    CGFloat marginTop = TopBar_height;
-    _smallImageInScroll = [[UIImageView alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - imageW) / 2, marginTop, imageW, imageW)];
-    [_scrollView addSubview:_smallImageInScroll];
+
+    NSString *mVideoPath = self.mMediaObject.mOutputVideoPath;
     
-    UIImageView *bottomImage = [[UIImageView alloc]initWithImage:ImageNamed(@"shadow_asset")];
-    bottomImage.frame = CGRectMake((SCREEN_WIDTH - imageW) / 2, marginTop + imageW - 65, imageW, 65);
-    [_scrollView addSubview:bottomImage];
-    
-    CGSize coverTexttSize = [@" 设置封面" sizeWithAttributes:@{NSFontAttributeName: kFontSizeSmall}];
-    UIButton *coverButton = [[UIButton alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - coverTexttSize.width - 32) / 2, marginTop + imageW - coverTexttSize.height - 14, coverTexttSize.width + 32, coverTexttSize.height + 10)];
-    coverButton.titleLabel.font = kFontSizeSmall;
-    [coverButton addTarget:self action:@selector(pressCoverButton) forControlEvents:UIControlEventTouchUpInside];
-    [coverButton setImage:[UIImage imageNamed:@"ic_cover"] withTitle:@" 设置封面" titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    coverButton.layer.zPosition = 1000;
-    [_scrollView addSubview:coverButton];
-    
-    UIView *bottomView = [[UIView alloc]initWithFrame:CGRectMake(0, marginTop + imageW + 10, SCREEN_WIDTH, SCREEN_HEIGHT - marginTop- imageW - 10)];
-    bottomView.backgroundColor = BACKGROUND_COLOR;
-    [_scrollView addSubview:bottomView];
-    
-    UIView *bottomWhiteView = [[UIView alloc]initWithFrame:CGRectMake(0, marginTop + imageW + 10, SCREEN_WIDTH, 168)];
-    bottomWhiteView.backgroundColor = [UIColor whiteColor];
-    [_scrollView addSubview:bottomWhiteView];
+    NSURL *urlMovie = [NSURL URLWithString:[[[BabyFileManager manager] themeDir] stringByAppendingString:[mVideoPath lastPathComponent]]];
     
     
-    self.textView = [[HPGrowingTextView alloc]initWithFrame:CGRectMake(10, marginTop + imageW + 16, SCREEN_WIDTH - 20, 80)];
-    self.textView.isScrollable = NO;
-    self.textView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
-    self.textView.backgroundColor = [UIColor clearColor];
-    self.textView.minNumberOfLines = 3;
-    //    self.textView.maxNumberOfLines = 3;
-    // you can also set the maximum height in points with maxHeight
-    self.textView.maxHeight = 80.0f;
-    self.textView.returnKeyType = UIReturnKeyDone;
-    self.textView.font = kFontSizeNormal;
-    self.textView.tintColor = UIColorFromRGB(BABYCOLOR_base_color);
-    self.textView.textColor = UIColorFromRGB(BABYCOLOR_main_text);
-    self.textView.dataDetectorTypes = UIDataDetectorTypeAll; // 显示数据类型的连接模式（如电话号码、网址、地址等）
-    self.textView.keyboardType = UIKeyboardTypeDefault; // 设置弹出键盘的类型
-    self.textView.delegate = self;
-    self.textView.internalTextView.font = kFontSizeNormal;
-    self.textView.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
-    self.textView.placeholder = @"描述一下";
-    self.textView.placeholderColor = UIColorFromRGB(BABYCOLOR_comment_text);
-    self.textView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     
-    [_scrollView addSubview:self.textView];
-    
-    CGFloat bottomWhiteViewH = CGRectGetMaxY(bottomWhiteView.frame) - 48;
-    
-    _textViewNum = [[UILabel alloc]initWithFrame:CGRectMake(SCREEN_WIDTH - 110, bottomWhiteViewH - 40, 60, 30)];
-    _textViewNum.font = kFontSizeSmall;
-    _textViewNum.textAlignment = NSTextAlignmentRight;
-    _textViewNum.textColor = UIColorFromRGB(BABYCOLOR_comment_text);
-    [_scrollView addSubview:self.textViewNum];
-    
-    
-    // 添加话题Button
-    _tagButton = [[UIButton alloc]initWithFrame:CGRectMake(10, bottomWhiteViewH - 40, 60, 30)];
-    [_tagButton addTarget:self action:@selector(pressTagButton) forControlEvents:UIControlEventTouchUpInside];
-    [_tagButton setTitle:@"#话题#" forState:UIControlStateNormal];
-    _tagButton.titleLabel.font = kFontSizeNormal;
-    [_tagButton setTitleColor:UIColorFromRGB(BABYCOLOR_main_text) forState:UIControlStateNormal];
-    [_tagButton setTitleColor:UIColorFromRGB(BABYCOLOR_main_text) forState:UIControlStateHighlighted];
-    [_tagButton setBackgroundImage:ImageNamed(@"bg_circle_gray") forState:UIControlStateNormal];
-    [_tagButton setBackgroundImage:ImageNamed(@"bg_circle_gray_pressed") forState:UIControlStateHighlighted];
-    [_scrollView addSubview:_tagButton];
-    
-    // 添加AT button
-    _atButton = [[UIButton alloc]initWithFrame:CGRectMake(80, bottomWhiteViewH - 40, 30, 30)];
-    [_atButton addTarget:self action:@selector(pressAtButton) forControlEvents:UIControlEventTouchUpInside];
-    [_atButton setImageEdgeInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
-    [_atButton setImage:ImageNamed(@"baby_edit_at") forState:UIControlStateNormal];
-    [_atButton setImage:ImageNamed(@"baby_edit_at") forState:UIControlStateHighlighted];
-    [_atButton setBackgroundImage:ImageNamed(@"bg_circle_gray") forState:UIControlStateNormal];
-    [_atButton setBackgroundImage:ImageNamed(@"bg_circle_gray_pressed") forState:UIControlStateHighlighted];
-    [_scrollView addSubview:_atButton];
-    
-    // 添加位置 button
-    _locationButton = [[UIButton alloc]initWithFrame:CGRectMake(120, bottomWhiteViewH - 40, 30, 30)];
-    [_locationButton addTarget:self action:@selector(pressLocationButton) forControlEvents:UIControlEventTouchUpInside];
-    [_locationButton setImageEdgeInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
-    [_locationButton setImage:ImageNamed(@"ic_location_nor") forState:UIControlStateNormal];
-    [_locationButton setImage:ImageNamed(@"ic_location_nor") forState:UIControlStateHighlighted];
-    _locationButton.titleLabel.font = kFontSizeNormal;
-    [_locationButton setTitleColor:UIColorFromRGB(BABYCOLOR_main_text) forState:UIControlStateNormal];
-    [_locationButton setTitleColor:UIColorFromRGB(BABYCOLOR_main_text) forState:UIControlStateHighlighted];
-    [_locationButton setBackgroundImage:ImageNamed(@"bg_circle_gray") forState:UIControlStateNormal];
-    [_locationButton setBackgroundImage:ImageNamed(@"bg_circle_gray_pressed") forState:UIControlStateHighlighted];
-    [_scrollView addSubview:_locationButton];
-    
-    // 添加锁定 button
-    _privateButton = [[UIButton alloc]initWithFrame:CGRectMake(SCREEN_WIDTH - 40, bottomWhiteViewH - 40, 30, 30)];
-    [_privateButton addTarget:self action:@selector(pressPrivateButton) forControlEvents:UIControlEventTouchUpInside];
-    [_privateButton setBackgroundImage:ImageNamed(@"ic_set_media_public_nor") forState:UIControlStateNormal];
-    [_privateButton setBackgroundImage:ImageNamed(@"ic_set_media_public_psd") forState:UIControlStateSelected];
-    [_scrollView addSubview:_privateButton];
-    
-    UIView *bottomLine1 = [[UIView alloc]initWithFrame:CGRectMake(0, bottomWhiteViewH, SCREEN_WIDTH, 1)];
-    bottomLine1.backgroundColor = UIColorFromRGB(BABYCOLOR_background);
-    [_scrollView addSubview:bottomLine1];
-    
-    UILabel *addBoardTip = [[UILabel alloc]initWithFrame:CGRectMake(10, bottomWhiteViewH, 100, 48)];
-    addBoardTip.text = @"添加到影集";
-    addBoardTip.font = kFontSizeNormal;
-    addBoardTip.textColor = UIColorFromRGB(BABYCOLOR_main_text);
-    _addBoardTip = addBoardTip;
-    [_scrollView addSubview:_addBoardTip];
-    
-//    [AMapLocationServices sharedServices].apiKey = AMAPAPIKEY;
-    _scrollView.hidden = YES;
+    IJKFFOptions *options = [IJKFFOptions optionsByDefault];
 
     
-    [self initData];
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:urlMovie withFilters:self.videoFilter withOptions:options];
+    self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    self.player.view.frame = CGRectMake(0, NavigationBar_HEIGHT, SCREEN_WIDTH, SCREEN_WIDTH);
+    self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
+    self.player.shouldAutoplay = YES;
     
+    self.view.autoresizesSubviews = YES;
+    [self.view addSubview:self.player.view];
+    
+    
+    
+    [self.player play];
+    
+    
+    [self initData];
+
+}
+
+- (void)savedButton
+{
+    
+}
+
+-(void)initNavibar
+{
+    UIView *colorBack = [[UIView alloc] init];
+    [colorBack setBackgroundColor:RGB(244.0f, 48.0f, 125.0f)];
+    [self.view addSubview:colorBack];
+    colorBack.sd_layout.xIs(0).yIs(0).widthIs(self.view.width).heightIs(50.0f);
+    
+    
+    //关闭
+    self.closeButton = [[UIButton alloc] init];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateNormal];
+    [_closeButton setImage:ImageNamed(@"baby_icn_back") forState:UIControlStateDisabled];
+    //    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateSelected];
+    //    [_closeButton setImage:ImageNamed(@"record_cancel_press") forState:UIControlStateHighlighted];
+    [_closeButton addTarget:self action:@selector(pressCloseButton) forControlEvents:UIControlEventTouchUpInside];
+    _closeButton.layer.zPosition = 1001;
+    [self.view addSubview:_closeButton];
+    
+    
+    _closeButton.sd_layout
+    .widthIs(40)
+    .heightIs(40)
+    .topSpaceToView(self.view, 5)
+    .leftSpaceToView(self.view, 5);
+    
+
+}
+
+-(void)pressCloseButton
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)initUserInfo

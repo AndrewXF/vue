@@ -8,6 +8,11 @@
 
 #import "BabyBaseVC.h"
 #import "BabyUploadEntity.h"
+#import "MediaObject.h"
+
+#import <IJKMediaFramework/IJKMediaPlayback.h>
+#import <IJKMediaFramework/IJKFFMoviePlayerController.h>
+
 
 @interface VideoPublishViewController : BabyBaseVC
 
@@ -19,5 +24,13 @@
 
 @property(nonatomic, copy) void(^savedDraft) (BOOL saved);
 @property(nonatomic, copy) void(^onPublish) ();
+
+@property (nonatomic, strong) NSArray *videoFilter;
+
+
+@property(nonatomic, strong) MediaObject *mMediaObject;
+
+
+@property(atomic, retain) id<IJKMediaPlayback> player;
 
 @end

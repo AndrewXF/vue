@@ -10,6 +10,7 @@
 #import "VideoRecorderViewController.h"
 #import "Vue-Swift.h"
 #import "ThemeHelper.h"
+#import "VideoPublishViewController.h"
 
 
 @interface ViewController ()
@@ -43,6 +44,28 @@
     UINavigationController *cameraNav = [[UINavigationController alloc]initWithRootViewController:camera];
     [self presentViewController:cameraNav animated:YES completion:nil];
 
+    
+//    VideoPublishViewController *publishVC = [[VideoPublishViewController alloc]init];
+////    publishVC.uploadEntity = uploadInfo;
+////    publishVC.fromDraft = _fromDraft;
+//    
+//    publishVC.savedDraft = ^(BOOL saved) {
+////        if (self.savedDraft) {
+////            self.savedDraft(saved);
+////        }
+//    };
+//    
+//    publishVC.onPublish = ^() {
+////        if (self.onPublish) {
+////            self.onPublish();
+////        }
+//        [self.navigationController popViewControllerAnimated:YES];
+//    };
+//    
+//   [self presentViewController:publishVC animated:YES completion:nil];
+
+//    [self.navigationController pushViewController:publishVC animated:YES];
+    
 }
 
 - (void)didReceiveMemoryWarning {
