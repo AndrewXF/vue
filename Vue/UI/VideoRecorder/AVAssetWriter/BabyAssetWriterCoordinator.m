@@ -178,10 +178,11 @@ typedef NS_ENUM(NSInteger, WriterStatus){
             
             DLog(@"audio stream setup, channels (%d) sampleRate (%f)", channels, sampleRate);
             int cameraSelection = _isFrontCanera ? 1 : 0;
-//            [_recorder coorInitRecorder:_URL srcHight:dimensions.width cameraSelection:cameraSelection audioBitrate:64000 videoBitrate:1500 hasAudio:1];
+            [_recorder coorInitRecorder:_URL srcHight:dimensions.width cameraSelection:cameraSelection audioBitrate:64000 videoBitrate:1500 hasAudio:1];
            
-            
-            [_recorder coorInitRecorder:_URL srcHight:dimensions.width videoHeight:640  cameraSelection:cameraSelection audioBitrate:64000 videoBitrate:1500 hasAudio:1 overFile:@"null"];
+//            [_recorder coorInitRecorder:_URL srcHight:dimensions.width videoHeight:640  cameraSelection:cameraSelection audioBitrate:64000 videoBitrate:1500 hasAudio:1 overFile:@"null"];
+
+//            [_recorder coorInitRecorder:_URL srcHight:dimensions.width videoHeight:640  cameraSelection:cameraSelection audioBitrate:64000 videoBitrate:1500 hasAudio:1 overFile:@"null"];
             
         }
     } );

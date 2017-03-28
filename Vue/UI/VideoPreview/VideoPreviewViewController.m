@@ -234,14 +234,14 @@
     _closeButton.sd_layout
     .widthIs(40)
     .heightIs(40)
-    .topSpaceToView(self.view, 5)
+    .topSpaceToView(self.view, 10)
     .leftSpaceToView(self.view, 5);
     
     
     
     CGSize rightTexttSize = [@"下一步" sizeWithAttributes:@{NSFontAttributeName: kFontSize(18)}];
     
-    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(colorBack.frame.size.width-85.0f, 15.0f, rightTexttSize.width + 16, rightTexttSize.height)];
+    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(colorBack.frame.size.width-85.0f, 20.0f, rightTexttSize.width + 16, rightTexttSize.height)];
     rightButton.titleLabel.font = kFontSize(18);
     [rightButton addTarget:self action:@selector(pressNextButton) forControlEvents:UIControlEventTouchUpInside];
     [rightButton setImageRight:[UIImage imageNamed:@"baby_icn_next"] withTitle:@"下一步" titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -310,7 +310,7 @@
     
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withFilters:self.videoFilter withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-    self.player.view.frame = CGRectMake(0, NavigationBar_HEIGHT, SCREEN_WIDTH, SCREEN_WIDTH);
+    self.player.view.frame = CGRectMake(0, NavigationBar_HEIGHT+10.0f, SCREEN_WIDTH, SCREEN_WIDTH);
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
     self.player.shouldAutoplay = YES;
     
@@ -528,7 +528,7 @@
         [mutableArray addObject:@"-itsoffset"];
         
        
-        
+
         [mutableArray addObject:[NSString stringWithFormat:@"%d",(videoTime - 2)]];
         [mutableArray addObject:@"-i"];
         [mutableArray addObject:[_mThemeCommonPath stringByAppendingPathComponent:@"tail.mp4"]];
@@ -707,6 +707,8 @@
     publishVC.fromDraft = _fromDraft;
     publishVC.mMediaObject = self.mMediaObject;
     publishVC.videoFilter = self.videoFilter;
+    publishVC.mVideoTempPath = _mVideoTempPath;
+    
     
     publishVC.savedDraft = ^(BOOL saved) {
         if (self.savedDraft) {

@@ -27,6 +27,11 @@
 
 @property (nonatomic, strong) NSArray *videoFilter;
 
+/**
+ * 临时合并视频流
+ */
+@property (nonatomic, strong) NSString *mVideoTempPath;
+
 
 @property(nonatomic, strong) MediaObject *mMediaObject;
 

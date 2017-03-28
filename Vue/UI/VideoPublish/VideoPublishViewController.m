@@ -96,29 +96,50 @@
     
     
     
-    UIButton *publishButton = [[UIButton alloc]initWithFrame:CGRectMake(0, (SCREEN_HEIGHT - NavigationBar_HEIGHT), SCREEN_WIDTH, NavigationBar_HEIGHT)];
-    
-    publishButton.titleLabel.font = kFontSize(18);
-    [publishButton addTarget:self action:@selector(pressPublishButton) forControlEvents:UIControlEventTouchUpInside];
-    [publishButton setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [publishButton setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
-    [self.view addSubview:publishButton];
-    
-    publishButton.sd_layout.xIs(self.view.frame.size.width*1.0f/4.0f).bottomEqualToView(self.view).widthIs(51.0f*SCREEN_FACTORY).heightIs(SCREEN_FACTORY*51.0f);
-    
-    
-    
     UIButton *publishButtonSave = [[UIButton alloc]initWithFrame:CGRectMake(0, (SCREEN_HEIGHT - NavigationBar_HEIGHT), SCREEN_WIDTH, NavigationBar_HEIGHT)];
     
     publishButtonSave.titleLabel.font = kFontSize(18);
-    [publishButtonSave addTarget:self action:@selector(savedButton) forControlEvents:UIControlEventTouchUpInside];
-    [publishButtonSave setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [publishButtonSave setImageRight:[UIImage imageNamed:@"baby_list_checkbox_ok"] withTitle:@"分 享 " titleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
-
+    [publishButtonSave addTarget:self action:@selector(pressPublishButton) forControlEvents:UIControlEventTouchUpInside];
+    [publishButtonSave setBackgroundImage:ImageNamed(@"savepublish") forState:UIControlStateNormal];
     [self.view addSubview:publishButtonSave];
     
+    publishButtonSave.sd_layout.centerXIs(SCREEN_WIDTH/4.0f).centerYIs(self.view.frame.size.height - 51*SCREEN_FACTORY).widthIs(51.0f*SCREEN_FACTORY).heightIs(51.0f*SCREEN_FACTORY);
     
-    publishButtonSave.sd_layout.centerXIs(self.view.frame.size.width*3.0f/4.0f).bottomEqualToView(self.view).widthIs(51.0f*SCREEN_FACTORY).heightIs(SCREEN_FACTORY*51.0f);
+    [publishButtonSave setBackgroundColor:[UIColor clearColor]];
+    UILabel *labelSave = [[UILabel alloc] init];
+    labelSave.textAlignment = 1;
+    [labelSave setText:@"保存到本地"];
+    [self.view addSubview:labelSave];
+    
+    
+    labelSave.sd_layout.centerXIs(SCREEN_WIDTH/4.0f).topSpaceToView(publishButtonSave,-5.0f).widthIs(100).heightIs(30);
+    
+    
+    NSLog(@"SCREEN_WIDTH=%f",SCREEN_WIDTH/4.0f);
+    
+    
+    UIButton *publishButtonShare = [[UIButton alloc]initWithFrame:CGRectMake(0, (SCREEN_HEIGHT - NavigationBar_HEIGHT), SCREEN_WIDTH, NavigationBar_HEIGHT)];
+    
+    publishButtonShare.titleLabel.font = kFontSize(18);
+    [publishButtonShare addTarget:self action:@selector(savedButton) forControlEvents:UIControlEventTouchUpInside];
+    [publishButtonShare setBackgroundImage:ImageNamed(@"sharepublish") forState:UIControlStateNormal];
+    [self.view addSubview:publishButtonShare];
+    
+    
+    publishButtonShare.sd_layout.centerXIs(SCREEN_WIDTH*0.75f).centerYIs(self.view.frame.size.height - 51*SCREEN_FACTORY).widthIs(51.0f*SCREEN_FACTORY).heightIs(SCREEN_FACTORY*51.0f);
+    [publishButtonShare setBackgroundColor:[UIColor clearColor]];
+    
+    
+    
+    UILabel *labelShare = [[UILabel alloc] init];
+    labelShare.textAlignment = 1;
+    [labelShare setText:@"分 享"];
+    [self.view addSubview:labelShare];
+    
+    
+    labelShare.sd_layout.leftEqualToView(publishButtonShare).rightEqualToView(publishButtonShare).topSpaceToView(publishButtonShare,-5.0f).heightIs(30);
+    
+
     
     
 
@@ -143,6 +164,7 @@
     
     NSURL *urlMovie = [NSURL URLWithString:[[[BabyFileManager manager] themeDir] stringByAppendingString:[mVideoPath lastPathComponent]]];
     
+    NSLog(@"urlMovie=%@",urlMovie);
     
     
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
@@ -153,22 +175,42 @@
     self.player.view.frame = CGRectMake(0, NavigationBar_HEIGHT, SCREEN_WIDTH, SCREEN_WIDTH);
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
     self.player.shouldAutoplay = YES;
-    
+
+    [self.player.view setBackgroundColor:[UIColor blueColor]];
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     
     
-    
-    [self.player play];
+    [self.player prepareToPlay];
     
     
     [self initData];
+    
+    
+    
+
+    [self installMovieNotificationObservers];
+
 
 }
 
 - (void)savedButton
 {
+    NSString *mVideoPath = self.mMediaObject.mOutputVideoPath;
+
+    NSURL *urlMovie = [NSURL URLWithString:[[[BabyFileManager manager] themeDir] stringByAppendingString:[mVideoPath lastPathComponent]]];
     
+    NSLog(@"urlMovie=%@",urlMovie);
+    
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+    [library writeVideoAtPathToSavedPhotosAlbum:urlMovie
+                                completionBlock:^(NSURL *assetURL, NSError *error) {
+                                    if (error) {
+                                        NSLog(@"Save video fail:%@",error);
+                                    } else {
+                                        NSLog(@"Save video succeed.");
+                                    }
+                                }];
 }
 
 -(void)initNavibar
@@ -198,6 +240,135 @@
     
 
 }
+
+
+- (void)moviePlayBackDidFinish:(NSNotification*)notification
+{
+    //    MPMovieFinishReasonPlaybackEnded,
+    //    MPMovieFinishReasonPlaybackError,
+    //    MPMovieFinishReasonUserExited
+    int reason = [[[notification userInfo] valueForKey:IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey] intValue];
+    
+    switch (reason)
+    {
+        case IJKMPMovieFinishReasonPlaybackEnded:
+            NSLog(@"playbackStateDidChange: IJKMPMovieFinishReasonPlaybackEnded: %d\n", reason);
+            break;
+            
+        case IJKMPMovieFinishReasonUserExited:
+            NSLog(@"playbackStateDidChange: IJKMPMovieFinishReasonUserExited: %d\n", reason);
+            [self.player playWithURLString:_mVideoTempPath withFilters:self.videoFilter];
+            break;
+            
+        case IJKMPMovieFinishReasonPlaybackError:
+            NSLog(@"playbackStateDidChange: IJKMPMovieFinishReasonPlaybackError: %d\n", reason);
+            break;
+            
+        default:
+            NSLog(@"playbackPlayBackDidFinish: ???: %d\n", reason);
+            break;
+    }
+}
+
+- (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
+{
+    NSLog(@"mediaIsPreparedToPlayDidChange\n");
+}
+
+- (void)moviePlayBackStateDidChange:(NSNotification*)notification
+{
+    //    MPMoviePlaybackStateStopped,
+    //    MPMoviePlaybackStatePlaying,
+    //    MPMoviePlaybackStatePaused,
+    //    MPMoviePlaybackStateInterrupted,
+    //    MPMoviePlaybackStateSeekingForward,
+    //    MPMoviePlaybackStateSeekingBackward
+    
+    switch (_player.playbackState)
+    {
+        case IJKMPMoviePlaybackStateStopped: {
+            NSLog(@"IJKMPMoviePlayBackStateDidChange %d: stoped", (int)_player.playbackState);
+            break;
+        }
+        case IJKMPMoviePlaybackStatePlaying: {
+            NSLog(@"IJKMPMoviePlayBackStateDidChange %d: playing", (int)_player.playbackState);
+            break;
+        }
+        case IJKMPMoviePlaybackStatePaused: {
+            NSLog(@"IJKMPMoviePlayBackStateDidChange %d: paused", (int)_player.playbackState);
+            break;
+        }
+        case IJKMPMoviePlaybackStateInterrupted: {
+            NSLog(@"IJKMPMoviePlayBackStateDidChange %d: interrupted", (int)_player.playbackState);
+            break;
+        }
+        case IJKMPMoviePlaybackStateSeekingForward:
+        case IJKMPMoviePlaybackStateSeekingBackward: {
+            NSLog(@"IJKMPMoviePlayBackStateDidChange %d: seeking", (int)_player.playbackState);
+            break;
+        }
+        default: {
+            NSLog(@"IJKMPMoviePlayBackStateDidChange %d: unknown", (int)_player.playbackState);
+            break;
+        }
+    }
+}
+
+#pragma mark Install Movie Notifications
+
+/* Register observers for the various movie object notifications. */
+-(void)installMovieNotificationObservers
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(loadStateDidChange:)
+                                                 name:IJKMPMoviePlayerLoadStateDidChangeNotification
+                                               object:_player];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(moviePlayBackDidFinish:)
+                                                 name:IJKMPMoviePlayerPlaybackDidFinishNotification
+                                               object:_player];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(mediaIsPreparedToPlayDidChange:)
+                                                 name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
+                                               object:_player];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(moviePlayBackStateDidChange:)
+                                                 name:IJKMPMoviePlayerPlaybackStateDidChangeNotification
+                                               object:_player];
+}
+
+- (void)loadStateDidChange:(NSNotification*)notification
+{
+    //    MPMovieLoadStateUnknown        = 0,
+    //    MPMovieLoadStatePlayable       = 1 << 0,
+    //    MPMovieLoadStatePlaythroughOK  = 1 << 1, // Playback will be automatically started in this state when shouldAutoplay is YES
+    //    MPMovieLoadStateStalled        = 1 << 2, // Playback will be automatically paused in this state, if started
+    
+    IJKMPMovieLoadState loadState = _player.loadState;
+    
+    if ((loadState & IJKMPMovieLoadStatePlaythroughOK) != 0) {
+        NSLog(@"loadStateDidChange: IJKMPMovieLoadStatePlaythroughOK: %d\n", (int)loadState);
+    } else if ((loadState & IJKMPMovieLoadStateStalled) != 0) {
+        NSLog(@"loadStateDidChange: IJKMPMovieLoadStateStalled: %d\n", (int)loadState);
+    } else {
+        NSLog(@"loadStateDidChange: ???: %d\n", (int)loadState);
+    }
+}
+
+#pragma mark Remove Movie Notification Handlers
+
+/* Remove the movie notification observers from the movie object. */
+-(void)removeMovieNotificationObservers
+{
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMPMoviePlayerLoadStateDidChangeNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMPMoviePlayerPlaybackDidFinishNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMPMoviePlayerPlaybackStateDidChangeNotification object:_player];
+}
+
 
 -(void)pressCloseButton
 {
@@ -233,6 +404,10 @@
     [self updateRightButton];
     [self updateAddBoardButton];
     [self updateTitlePage];
+    
+    
+    [self.player playWithURLString:_mVideoTempPath withFilters:self.videoFilter];
+
 //    [MobClick beginLogPageView:@"视频发布页面"];
 }
 
@@ -248,6 +423,9 @@
                                              selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
+    
+    [self.player shutdown];
+
 //    _locationManager = [[AMapLocationManager alloc] init];
 //    [_locationManager setDelegate:self];
 //    [_locationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters];
@@ -283,20 +461,20 @@
 
 - (void)initData
 {
-    _friends = [[NSMutableArray alloc]init];
-    _atUsersArray = [[NSMutableArray alloc]init];
-    _locationText = @"";
-    
-    _mCoverPath = _uploadEntity.file_image_path;
-    if ([StringUtils isEmpty:_mCoverPath]) {
-        _mCoverPath = _uploadEntity.file_image_original;
-    }
-    
-    _bool_private = [_uploadEntity.is_private intValue] > 0 ? YES : NO;
-    _publish_board_id = [_uploadEntity.board_id longValue];
-    _publish_board_text = _uploadEntity.board_name;
-    
-    _publish_raw_text = _uploadEntity.raw_text;
+//    _friends = [[NSMutableArray alloc]init];
+//    _atUsersArray = [[NSMutableArray alloc]init];
+//    _locationText = @"";
+//    
+//    _mCoverPath = _uploadEntity.file_image_path;
+//    if ([StringUtils isEmpty:_mCoverPath]) {
+//        _mCoverPath = _uploadEntity.file_image_original;
+//    }
+//    
+//    _bool_private = [_uploadEntity.is_private intValue] > 0 ? YES : NO;
+//    _publish_board_id = [_uploadEntity.board_id longValue];
+//    _publish_board_text = _uploadEntity.board_name;
+//    
+//    _publish_raw_text = _uploadEntity.raw_text;
     
 }
 
@@ -379,15 +557,15 @@
     }
     
     [UIView animateWithDuration:0.3f animations:^{
-        ALDBlurImageProcessor *_blurImageProcessor = [[ALDBlurImageProcessor alloc] initWithImage: _topImage.image];
-        [_blurImageProcessor asyncBlurWithRadius: 5
-                                      iterations: 11
-                                    successBlock: ^( UIImage *blurredImage) {
-                                        _topImage.image = blurredImage;
-                                    }
-                                      errorBlock: ^( NSNumber *errorCode ) {
-                                          DLog( @"Error code: %d", [errorCode intValue] );
-                                      }];
+//        ALDBlurImageProcessor *_blurImageProcessor = [[ALDBlurImageProcessor alloc] initWithImage: _topImage.image];
+//        [_blurImageProcessor asyncBlurWithRadius: 5
+//                                      iterations: 11
+//                                    successBlock: ^( UIImage *blurredImage) {
+//                                        _topImage.image = blurredImage;
+//                                    }
+//                                      errorBlock: ^( NSNumber *errorCode ) {
+//                                          DLog( @"Error code: %d", [errorCode intValue] );
+//                                      }];
     }];
     
     
